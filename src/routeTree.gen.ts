@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UrlCheckerRouteImport } from './routes/url-checker'
+import { Route as TextScannerRouteImport } from './routes/text-scanner'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UrlCheckerRoute = UrlCheckerRouteImport.update({
+  id: '/url-checker',
+  path: '/url-checker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TextScannerRoute = TextScannerRouteImport.update({
+  id: '/text-scanner',
+  path: '/text-scanner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRoute
+  '/text-scanner': typeof TextScannerRoute
+  '/url-checker': typeof UrlCheckerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRoute
+  '/text-scanner': typeof TextScannerRoute
+  '/url-checker': typeof UrlCheckerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRoute
+  '/text-scanner': typeof TextScannerRoute
+  '/url-checker': typeof UrlCheckerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
+  id: '__root__' | '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  ReportsRoute: typeof ReportsRoute
+  TextScannerRoute: typeof TextScannerRoute
+  UrlCheckerRoute: typeof UrlCheckerRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/url-checker': {
+      id: '/url-checker'
+      path: '/url-checker'
+      fullPath: '/url-checker'
+      preLoaderRoute: typeof UrlCheckerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/text-scanner': {
+      id: '/text-scanner'
+      path: '/text-scanner'
+      fullPath: '/text-scanner'
+      preLoaderRoute: typeof TextScannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +121,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  ReportsRoute: ReportsRoute,
+  TextScannerRoute: TextScannerRoute,
+  UrlCheckerRoute: UrlCheckerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
