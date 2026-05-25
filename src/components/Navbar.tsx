@@ -23,14 +23,17 @@ export function Navbar() {
           <span>Scam<span className="text-primary">Shield</span></span>
         </Link>
         <nav className="flex items-center gap-1">
-          <Link to="/url-checker" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-foreground" }}>
-            URL Checker
+          <Link to="/url-checker" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+            URL
           </Link>
-          <Link to="/text-scanner" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-foreground" }}>
-            Text Scanner
+          <Link to="/text-scanner" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+            Message
           </Link>
-          <Link to="/reports" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-foreground" }}>
-            Reports
+          <Link to="/pdf-analyzer" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+            PDF
+          </Link>
+          <Link to="/reports" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+            Feed
           </Link>
           {user ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="ml-2">

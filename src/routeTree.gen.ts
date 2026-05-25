@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UrlCheckerRouteImport } from './routes/url-checker'
 import { Route as TextScannerRouteImport } from './routes/text-scanner'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PdfAnalyzerRouteImport } from './routes/pdf-analyzer'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const ReportsRoute = ReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PdfAnalyzerRoute = PdfAnalyzerRouteImport.update({
+  id: '/pdf-analyzer',
+  path: '/pdf-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/pdf-analyzer': typeof PdfAnalyzerRoute
   '/reports': typeof ReportsRoute
   '/text-scanner': typeof TextScannerRoute
   '/url-checker': typeof UrlCheckerRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/pdf-analyzer': typeof PdfAnalyzerRoute
   '/reports': typeof ReportsRoute
   '/text-scanner': typeof TextScannerRoute
   '/url-checker': typeof UrlCheckerRoute
@@ -59,21 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/pdf-analyzer': typeof PdfAnalyzerRoute
   '/reports': typeof ReportsRoute
   '/text-scanner': typeof TextScannerRoute
   '/url-checker': typeof UrlCheckerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/pdf-analyzer'
+    | '/reports'
+    | '/text-scanner'
+    | '/url-checker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
-  id: '__root__' | '/' | '/auth' | '/reports' | '/text-scanner' | '/url-checker'
+  to:
+    | '/'
+    | '/auth'
+    | '/pdf-analyzer'
+    | '/reports'
+    | '/text-scanner'
+    | '/url-checker'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/pdf-analyzer'
+    | '/reports'
+    | '/text-scanner'
+    | '/url-checker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  PdfAnalyzerRoute: typeof PdfAnalyzerRoute
   ReportsRoute: typeof ReportsRoute
   TextScannerRoute: typeof TextScannerRoute
   UrlCheckerRoute: typeof UrlCheckerRoute
@@ -102,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pdf-analyzer': {
+      id: '/pdf-analyzer'
+      path: '/pdf-analyzer'
+      fullPath: '/pdf-analyzer'
+      preLoaderRoute: typeof PdfAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -122,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  PdfAnalyzerRoute: PdfAnalyzerRoute,
   ReportsRoute: ReportsRoute,
   TextScannerRoute: TextScannerRoute,
   UrlCheckerRoute: UrlCheckerRoute,
@@ -129,3 +166,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
