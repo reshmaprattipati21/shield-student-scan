@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, Building2, Plus, Trash2 } from "lucide-react";
+import { Users, Building2, Plus, Trash2, Flag } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,12 +43,13 @@ function Reports() {
   if (!authLoading && !user) {
     return (
       <div>
+        <CyberBg />
         <Navbar />
         <main className="mx-auto max-w-2xl px-6 py-20 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary"><Users className="h-7 w-7" /></div>
-          <h1 className="mt-6 text-3xl font-bold">Sign in to view reports</h1>
+          <h1 className="mt-6 text-3xl font-bold">Sign in to view the fraud feed</h1>
           <p className="mt-3 text-muted-foreground">The community scam database is available to verified students.</p>
-          <Button asChild className="mt-6"><Link to="/auth" search={{ redirect: "/reports" }}>Sign in</Link></Button>
+          <Button asChild className="mt-6 btn-neon-hover"><Link to="/auth" search={{ redirect: "/reports" }}>Sign in</Link></Button>
         </main>
       </div>
     );
@@ -55,18 +57,19 @@ function Reports() {
 
   return (
     <div>
+      <CyberBg />
       <Navbar />
-      <main className="mx-auto max-w-4xl px-6 py-12">
+      <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><Users className="h-5 w-5" /></div>
-              <h1 className="text-3xl font-bold">Community Reports</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Crowdsourced Fraud Feed</h1>
             </div>
-            <p className="text-muted-foreground mt-2">Recent scams reported by other students.</p>
+            <p className="text-muted-foreground mt-2">Live alerts from the student community.</p>
           </div>
-          <Button onClick={() => setShowForm((v) => !v)}>
-            <Plus className="h-4 w-4 mr-2" />{showForm ? "Close" : "New report"}
+          <Button onClick={() => setShowForm((v) => !v)} className="btn-neon-hover">
+            <Plus className="h-4 w-4 mr-2" />{showForm ? "Close" : "Report scam"}
           </Button>
         </div>
 
@@ -79,22 +82,32 @@ function Reports() {
             <p className="text-muted-foreground">No reports yet. Be the first to submit one.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {reports.map((r) => (
-              <article key={r.id} className="glass rounded-2xl p-5 hover:border-[color-mix(in_oklab,var(--cyber-cyan)_45%,transparent)] transition-all duration-200">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/15 text-destructive"><Building2 className="h-5 w-5" /></div>
-                    <div>
-                      <h3 className="font-semibold">{r.company_name}</h3>
-                      <div className="text-xs text-muted-foreground">on {r.platform} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</div>
+          <div className="glass rounded-2xl p-2 max-h-[70vh] overflow-y-auto">
+            <ul className="divide-y divide-cyan-400/10">
+              {reports.map((r) => (
+                <li key={r.id} className="group p-4 transition-all duration-500 hover:bg-cyan-400/5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/15 text-destructive shrink-0"><Building2 className="h-5 w-5" /></div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold truncate">{r.company_name}</h3>
+                        <div className="text-xs text-muted-foreground">on {r.platform} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</div>
+                        <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap break-words">{r.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        className="btn-neon-hover-red inline-flex items-center gap-1.5 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive"
+                        onClick={() => toast.success("Flagged as scam — thanks for protecting the community.")}
+                      >
+                        <Flag className="h-3.5 w-3.5" /> Report as Scam
+                      </button>
+                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={load} />}
                     </div>
                   </div>
-                  {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={load} />}
-                </div>
-                <p className="mt-3 text-sm text-foreground/90 whitespace-pre-wrap">{r.description}</p>
-              </article>
-            ))}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </main>
@@ -142,18 +155,18 @@ function ReportForm({ onSubmitted }: { onSubmitted: () => void }) {
   return (
     <form onSubmit={submit} className="glass rounded-2xl p-6 mb-6 space-y-4">
       <div>
-        <label className="text-sm font-medium">Company name</label>
+        <label className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Company name</label>
         <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Acme Internships" className="mt-1.5" />
       </div>
       <div>
-        <label className="text-sm font-medium">Platform found on</label>
+        <label className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Platform found on</label>
         <Input value={platform} onChange={(e) => setPlatform(e.target.value)} placeholder="e.g. LinkedIn, WhatsApp, Telegram, Email" className="mt-1.5" />
       </div>
       <div>
-        <label className="text-sm font-medium">Scam description</label>
+        <label className="text-xs uppercase tracking-[0.2em] text-cyan-300/80">Scam description</label>
         <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} placeholder="Describe what happened: how they reached out, what they asked for, red flags…" className="mt-1.5 resize-none" />
       </div>
-      <Button type="submit" disabled={submitting}>{submitting ? "Submitting…" : "Submit report"}</Button>
+      <Button type="submit" disabled={submitting} className="btn-neon-hover">{submitting ? "Submitting…" : "Submit report"}</Button>
     </form>
   );
 }
