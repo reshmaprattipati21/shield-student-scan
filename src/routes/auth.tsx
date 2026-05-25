@@ -87,7 +87,7 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-8">
+      <div className="w-full max-w-md glass rounded-2xl p-8">
         <div className="flex justify-center mb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary"><Shield className="h-6 w-6" /></div>
         </div>

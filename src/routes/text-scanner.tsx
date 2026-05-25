@@ -73,7 +73,7 @@ function TextScanner() {
         </div>
         <p className="text-muted-foreground mb-8">Paste a message from WhatsApp, Telegram, or email to scan for scam indicators.</p>
 
-        <form onSubmit={onScan} className="rounded-2xl border border-border/60 bg-card/60 p-6 backdrop-blur">
+        <form onSubmit={onScan} className="glass rounded-2xl p-6">
           <label className="text-sm font-medium">Message text</label>
           <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} placeholder="Paste the suspicious message here…" className="mt-2 resize-none" />
           <Button type="submit" className="mt-4">Scan message</Button>

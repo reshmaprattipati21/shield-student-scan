@@ -19,7 +19,7 @@ function Index() {
       <Navbar />
       <main className="mx-auto max-w-6xl px-6">
         <section className="py-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-4 py-1.5 text-xs text-muted-foreground">
+          <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-muted-foreground">
             <Shield className="h-3.5 w-3.5 text-primary" /> Built for students, by students
           </div>
           <h1 className="mt-6 text-5xl md:text-6xl font-bold tracking-tight">
@@ -41,7 +41,7 @@ function Index() {
             { icon: MessageSquareText, title: "Text Scanner", desc: "Paste WhatsApp, Telegram or email messages to flag high-risk language and known scam tactics.", to: "/text-scanner" },
             { icon: Users, title: "Community Reports", desc: "See real scams reported by students. Submit your own to help protect others.", to: "/reports" },
           ].map((f) => (
-            <Link key={f.title} to={f.to} className="group rounded-2xl border border-border/60 bg-card/60 p-6 backdrop-blur hover:border-primary/50 hover:bg-card transition">
+            <Link key={f.title} to={f.to} className="group glass rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--cyber-cyan)_55%,transparent)] hover:shadow-[0_20px_40px_-20px_color-mix(in_oklab,var(--cyber-cyan)_50%,transparent)]">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
                 <f.icon className="h-5 w-5" />
               </div>

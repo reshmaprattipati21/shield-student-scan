@@ -14,13 +14,13 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[color-mix(in_oklab,var(--cyber-cyan)_18%,transparent)] bg-background/60 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-lg">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary">
+        <Link to="/" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30 shadow-[0_0_16px_-2px_color-mix(in_oklab,var(--cyber-cyan)_50%,transparent)]">
             <Shield className="h-5 w-5" />
           </div>
-          ScamShield
+          <span>Scam<span className="text-primary">Shield</span></span>
         </Link>
         <nav className="flex items-center gap-1">
           <Link to="/url-checker" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-foreground" }}>

@@ -75,13 +75,13 @@ function Reports() {
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
         ) : reports.length === 0 ? (
-          <div className="rounded-2xl border border-border/60 bg-card/60 p-10 text-center">
+          <div className="glass rounded-2xl p-10 text-center">
             <p className="text-muted-foreground">No reports yet. Be the first to submit one.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {reports.map((r) => (
-              <article key={r.id} className="rounded-xl border border-border/60 bg-card/60 p-5 backdrop-blur">
+              <article key={r.id} className="glass rounded-2xl p-5 hover:border-[color-mix(in_oklab,var(--cyber-cyan)_45%,transparent)] transition-all duration-200">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/15 text-destructive"><Building2 className="h-5 w-5" /></div>
@@ -140,7 +140,7 @@ function ReportForm({ onSubmitted }: { onSubmitted: () => void }) {
   };
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-border/60 bg-card/60 p-6 backdrop-blur mb-6 space-y-4">
+    <form onSubmit={submit} className="glass rounded-2xl p-6 mb-6 space-y-4">
       <div>
         <label className="text-sm font-medium">Company name</label>
         <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Acme Internships" className="mt-1.5" />

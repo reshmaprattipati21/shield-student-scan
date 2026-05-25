@@ -100,7 +100,7 @@ function UrlChecker() {
         </div>
         <p className="text-muted-foreground mb-8">Paste a suspicious internship or job offer link to scan it.</p>
 
-        <form onSubmit={onCheck} className="rounded-2xl border border-border/60 bg-card/60 p-6 backdrop-blur">
+        <form onSubmit={onCheck} className="glass rounded-2xl p-6">
           <label className="text-sm font-medium">Website URL</label>
           <div className="mt-2 flex gap-2">
             <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example-careers.xyz/intern-apply" className="flex-1" />
