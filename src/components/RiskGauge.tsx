@@ -86,7 +86,7 @@ export function RiskGauge({ score, risk }: { score: number; risk: Risk }) {
       </svg>
       <div className="-mt-2 text-center">
         <div className={`text-4xl font-bold tabular-nums ${c.glowClass}`}>{Math.round(animated)}</div>
-        <div className={`text-xs font-semibold tracking-[0.28em] mt-1 ${c.glowClass}`}>{c.label}</div>
+        <div className={`text-xs font-semibold tracking-[0.28em] mt-1 ${c.glowClass} ${risk === "High" ? "animate-pulse" : ""}`}>{c.label}</div>
       </div>
     </div>
   );

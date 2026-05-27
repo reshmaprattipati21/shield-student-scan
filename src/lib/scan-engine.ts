@@ -80,7 +80,20 @@ export function scanText(text: string): TextScan {
 // ---------- URL scanner ----------
 export const SUSPICIOUS_TLDS = [".xyz", ".top", ".click", ".info", ".tk", ".online", ".live", ".work", ".support", ".click"];
 export const TRUSTED_BRANDS = ["google", "microsoft", "amazon", "linkedin", "meta", "apple", "facebook", "internshala", "naukri", "indeed", "wellsfargo", "paypal"];
-export const CRITICAL_URL_TOKENS = ["task", "earn", "telegram-job", "telegram_job", "whatsapp-verification", "whatsapp_verify", "crypto-job", "free-money", "easyearn", "quickcash", "kyc-update"];
+// Brand names that scammers commonly impersonate via dash-style hostnames (e.g. "tcs-internships-portal.com")
+export const IMPERSONATED_BRANDS = [
+  "tcs", "infosys", "wipro", "accenture", "deloitte", "tata", "cognizant", "capgemini",
+  "ibm", "oracle", "sap", "hcl", "techmahindra", "mahindra", "reliance", "adani",
+  "google", "microsoft", "amazon", "meta", "apple", "facebook", "linkedin",
+  "internshala", "naukri", "indeed", "unstop", "letsintern",
+];
+export const CRITICAL_URL_TOKENS = [
+  "task", "earn", "telegram-job", "telegram_job", "whatsapp-verification", "whatsapp_verify",
+  "crypto-job", "free-money", "easyearn", "quickcash", "kyc-update",
+  "internships-portal", "internship-portal", "intern-portal", "interns-portal",
+  "job-verification", "jobs-verification", "job-verify", "career-portal", "careers-portal",
+  "hr-portal", "offer-letter", "offer-verify", "selection-letter",
+];
 export const SUSPICIOUS_WORDS = ["secure", "verify", "login", "career", "intern", "hr", "job", "offer", "payment", "task", "earn"];
 
 export type UrlScan = {
@@ -129,6 +142,18 @@ export function scanUrl(rawUrl: string): UrlScan {
     }
   }
 
+  // Brand impersonation via dash-style hostnames (e.g. "tcs-internships-portal.com", "google-careers-hub.xyz")
+  const hostNoTld = host.replace(/\.[^.]+$/, "");
+  if (hostNoTld.includes("-")) {
+    for (const brand of IMPERSONATED_BRANDS) {
+      const re = new RegExp(`(^|[-.])${brand}(-|$)`);
+      if (re.test(hostNoTld) && !host.endsWith(`${brand}.com`) && !host.endsWith(`${brand}.co.in`) && !host.endsWith(`${brand}.org`) && !host.endsWith(`${brand}.in`)) {
+        signals.push({ label: `Brand impersonation: "${brand}" used in a dash-style domain`, bad: true });
+        score += 70; critical = true; break;
+      }
+    }
+  }
+
   // Typosquatting
   for (const brand of TRUSTED_BRANDS) {
     if (host.includes(brand) && !host.endsWith(`${brand}.com`) && !host.endsWith(`${brand}.co.in`) && !host.endsWith(`${brand}.org`)) {
@@ -138,7 +163,7 @@ export function scanUrl(rawUrl: string): UrlScan {
   }
 
   const hyphens = (host.match(/-/g) || []).length;
-  if (hyphens >= 2) { signals.push({ label: `Domain contains ${hyphens} hyphens`, bad: true }); score += 15; }
+  if (hyphens >= 2) { signals.push({ label: `Domain contains ${hyphens} hyphens (uncommon for legitimate brands)`, bad: true }); score += 25; critical = critical || hyphens >= 3; }
   if (host.length > 30) { signals.push({ label: "Unusually long domain", bad: true }); score += 12; }
   const parts = host.split(".");
   if (parts.length >= 4) { signals.push({ label: "Excessive subdomains", bad: true }); score += 12; }

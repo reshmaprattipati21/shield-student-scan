@@ -61,23 +61,28 @@ function UrlChecker() {
         </form>
 
         {result && (
-          <div className="mt-6 grid gap-6 md:grid-cols-[300px_1fr]">
-            <div className="glass rounded-2xl p-6 flex flex-col items-center justify-center">
-              <RiskGauge score={result.score} risk={result.risk} />
-              <div className="mt-3 text-sm text-muted-foreground truncate max-w-[240px]" title={result.domain}>{result.domain}</div>
+          <div className="mt-6 space-y-4">
+            <div className="glass rounded-2xl px-5 py-3 flex items-center gap-3">
+              <span className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 shrink-0">Analyzed URL</span>
+              <span className="text-sm font-mono text-foreground truncate" title={result.domain}>{result.domain}</span>
             </div>
-            <div className="glass rounded-2xl p-6">
-              <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">Threat signals</div>
-              <ul className="space-y-2">
-                {result.signals.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    {s.bad
-                      ? <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                      : <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />}
-                    <span className={s.bad ? "text-foreground" : "text-muted-foreground"}>{s.label}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid gap-6 md:grid-cols-[300px_1fr]">
+              <div className="glass rounded-2xl p-6 flex items-center justify-center min-h-[220px]">
+                <RiskGauge score={result.score} risk={result.risk} />
+              </div>
+              <div className="glass rounded-2xl p-6">
+                <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">Threat signals</div>
+                <ul className="space-y-2">
+                  {result.signals.map((s, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      {s.bad
+                        ? <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                        : <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />}
+                      <span className={s.bad ? "text-foreground" : "text-muted-foreground"}>{s.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         )}
