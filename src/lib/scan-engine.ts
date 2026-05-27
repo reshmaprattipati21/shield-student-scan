@@ -80,7 +80,20 @@ export function scanText(text: string): TextScan {
 // ---------- URL scanner ----------
 export const SUSPICIOUS_TLDS = [".xyz", ".top", ".click", ".info", ".tk", ".online", ".live", ".work", ".support", ".click"];
 export const TRUSTED_BRANDS = ["google", "microsoft", "amazon", "linkedin", "meta", "apple", "facebook", "internshala", "naukri", "indeed", "wellsfargo", "paypal"];
-export const CRITICAL_URL_TOKENS = ["task", "earn", "telegram-job", "telegram_job", "whatsapp-verification", "whatsapp_verify", "crypto-job", "free-money", "easyearn", "quickcash", "kyc-update"];
+// Brand names that scammers commonly impersonate via dash-style hostnames (e.g. "tcs-internships-portal.com")
+export const IMPERSONATED_BRANDS = [
+  "tcs", "infosys", "wipro", "accenture", "deloitte", "tata", "cognizant", "capgemini",
+  "ibm", "oracle", "sap", "hcl", "techmahindra", "mahindra", "reliance", "adani",
+  "google", "microsoft", "amazon", "meta", "apple", "facebook", "linkedin",
+  "internshala", "naukri", "indeed", "unstop", "letsintern",
+];
+export const CRITICAL_URL_TOKENS = [
+  "task", "earn", "telegram-job", "telegram_job", "whatsapp-verification", "whatsapp_verify",
+  "crypto-job", "free-money", "easyearn", "quickcash", "kyc-update",
+  "internships-portal", "internship-portal", "intern-portal", "interns-portal",
+  "job-verification", "jobs-verification", "job-verify", "career-portal", "careers-portal",
+  "hr-portal", "offer-letter", "offer-verify", "selection-letter",
+];
 export const SUSPICIOUS_WORDS = ["secure", "verify", "login", "career", "intern", "hr", "job", "offer", "payment", "task", "earn"];
 
 export type UrlScan = {
