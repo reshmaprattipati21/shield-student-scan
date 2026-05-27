@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Users, Building2, Plus, Trash2, Flag } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { BackToDashboard } from "@/components/BackToDashboard";
 import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ function Reports() {
       <div>
         <CyberBg />
         <Navbar />
+        <BackToDashboard />
         <main className="mx-auto max-w-2xl px-6 py-20 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary"><Users className="h-7 w-7" /></div>
           <h1 className="mt-6 text-3xl font-bold">Sign in to view the fraud feed</h1>
@@ -59,6 +61,7 @@ function Reports() {
     <div>
       <CyberBg />
       <Navbar />
+      <BackToDashboard />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>

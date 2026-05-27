@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { UploadCloud, FileText, AlertTriangle, ShieldCheck } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { BackToDashboard } from "@/components/BackToDashboard";
 import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { RadarRing } from "@/components/RadarRing";
@@ -73,6 +74,7 @@ function PdfAnalyzer() {
     <div>
       <CyberBg />
       <Navbar />
+      <BackToDashboard />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="flex items-start justify-between gap-6 mb-8">
           <div>

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Link2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { BackToDashboard } from "@/components/BackToDashboard";
 import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ function UrlChecker() {
     <div>
       <CyberBg />
       <Navbar />
+      <BackToDashboard />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="flex items-start justify-between gap-6 mb-8">
           <div>
