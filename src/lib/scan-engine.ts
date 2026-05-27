@@ -142,6 +142,18 @@ export function scanUrl(rawUrl: string): UrlScan {
     }
   }
 
+  // Brand impersonation via dash-style hostnames (e.g. "tcs-internships-portal.com", "google-careers-hub.xyz")
+  const hostNoTld = host.replace(/\.[^.]+$/, "");
+  if (hostNoTld.includes("-")) {
+    for (const brand of IMPERSONATED_BRANDS) {
+      const re = new RegExp(`(^|[-.])${brand}(-|$)`);
+      if (re.test(hostNoTld) && !host.endsWith(`${brand}.com`) && !host.endsWith(`${brand}.co.in`) && !host.endsWith(`${brand}.org`) && !host.endsWith(`${brand}.in`)) {
+        signals.push({ label: `Brand impersonation: "${brand}" used in a dash-style domain`, bad: true });
+        score += 70; critical = true; break;
+      }
+    }
+  }
+
   // Typosquatting
   for (const brand of TRUSTED_BRANDS) {
     if (host.includes(brand) && !host.endsWith(`${brand}.com`) && !host.endsWith(`${brand}.co.in`) && !host.endsWith(`${brand}.org`)) {
@@ -151,7 +163,7 @@ export function scanUrl(rawUrl: string): UrlScan {
   }
 
   const hyphens = (host.match(/-/g) || []).length;
-  if (hyphens >= 2) { signals.push({ label: `Domain contains ${hyphens} hyphens`, bad: true }); score += 15; }
+  if (hyphens >= 2) { signals.push({ label: `Domain contains ${hyphens} hyphens (uncommon for legitimate brands)`, bad: true }); score += 25; critical = critical || hyphens >= 3; }
   if (host.length > 30) { signals.push({ label: "Unusually long domain", bad: true }); score += 12; }
   const parts = host.split(".");
   if (parts.length >= 4) { signals.push({ label: "Excessive subdomains", bad: true }); score += 12; }
