@@ -163,10 +163,14 @@ export function AIAssistant() {
       {/* Chat window */}
       {open && (
         <div
-          className="fixed bottom-24 right-4 sm:right-6 z-50 w-[min(400px,calc(100vw-2rem))] h-[min(620px,calc(100vh-8rem))] glass rounded-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+          className="fixed bottom-24 right-4 sm:right-6 z-50 w-[min(400px,calc(100vw-2rem))] h-[min(620px,calc(100vh-8rem))] rounded-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
           style={{
+            background: "#0F172A",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            border: "1px solid color-mix(in oklab, var(--cyber-cyan) 45%, transparent)",
             boxShadow:
-              "0 0 0 1px color-mix(in oklab, var(--cyber-cyan) 35%, transparent), 0 20px 60px -20px color-mix(in oklab, var(--cyber-cyan) 45%, transparent)",
+              "0 0 0 1px color-mix(in oklab, var(--cyber-cyan) 35%, transparent), 0 24px 60px -20px rgba(0,0,0,0.85)",
           }}
         >
           {/* Header */}
@@ -198,19 +202,19 @@ export function AIAssistant() {
               <div key={m.id} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div
                   className={[
-                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap",
+                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap shadow-sm",
                     m.role === "user"
-                      ? "bg-primary/15 text-foreground border border-primary/30"
+                      ? "bg-primary/25 text-foreground border border-primary/50"
                       : m.danger
                         ? "border text-foreground"
-                        : "bg-muted/40 text-foreground border border-border",
+                        : "bg-[#1E293B] text-foreground border border-[color-mix(in_oklab,var(--cyber-cyan)_25%,transparent)]",
                   ].join(" ")}
                   style={
                     m.danger
                       ? {
-                          background: "color-mix(in oklab, var(--cyber-crimson) 14%, transparent)",
-                          borderColor: "color-mix(in oklab, var(--cyber-crimson) 55%, transparent)",
-                          boxShadow: "0 0 24px color-mix(in oklab, var(--cyber-crimson) 28%, transparent)",
+                          background: "color-mix(in oklab, var(--cyber-crimson) 22%, #1E293B)",
+                          borderColor: "color-mix(in oklab, var(--cyber-crimson) 65%, transparent)",
+                          boxShadow: "0 0 24px color-mix(in oklab, var(--cyber-crimson) 30%, transparent)",
                         }
                       : undefined
                   }
@@ -229,7 +233,7 @@ export function AIAssistant() {
 
             {sending && (
               <div className="flex items-start">
-                <div className="bg-muted/40 border border-border rounded-2xl px-3.5 py-2.5 text-[13px] inline-flex items-center gap-2 text-muted-foreground">
+                <div className="bg-[#1E293B] border border-[color-mix(in_oklab,var(--cyber-cyan)_25%,transparent)] rounded-2xl px-3.5 py-2.5 text-[13px] inline-flex items-center gap-2 text-foreground/80">
                   <span className="flex gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -260,7 +264,7 @@ export function AIAssistant() {
 
           {/* Input */}
           <div className="p-3 pt-1 border-t border-[color-mix(in_oklab,var(--cyber-cyan)_20%,transparent)]">
-            <div className="glass-input rounded-xl flex items-center gap-2 px-3 py-2">
+            <div className="rounded-xl flex items-center gap-2 px-3 py-2 bg-[#0B1220] border border-[color-mix(in_oklab,var(--cyber-cyan)_35%,transparent)] focus-within:border-primary/70 focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--cyber-cyan)_20%,transparent)] transition">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
