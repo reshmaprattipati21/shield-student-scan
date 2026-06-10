@@ -68,7 +68,19 @@ function UrlChecker() {
                 <RiskGauge score={result.score} risk={result.risk} />
               </div>
               <div className="glass rounded-2xl p-6">
-                <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">Threat signals</div>
+                <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">Verdict</div>
+                {result.risk === "Low" ? (
+                  <div className="flex items-start gap-2 text-sm text-success mb-4">
+                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span><span className="font-semibold">Verified Employer.</span> This domain and document structure match official university-approved recruitment channels and certified company domains.</span>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 text-sm text-destructive mb-4">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span><span className="font-semibold">Critical Risk Flagged.</span> This domain shows impersonation or typosquatting patterns commonly used in fraudulent internship campaigns. Do not submit any personal information.</span>
+                  </div>
+                )}
+                <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">Domain anomalies</div>
                 <ul className="space-y-2">
                   {result.signals.map((s, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
