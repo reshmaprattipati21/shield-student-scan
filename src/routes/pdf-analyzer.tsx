@@ -11,7 +11,7 @@ import { scanText } from "@/lib/scan-engine";
 
 export const Route = createFileRoute("/pdf-analyzer")({
   component: PdfAnalyzer,
-  head: () => ({ meta: [{ title: "Offer Letter Analyzer — ScamShield" }, { name: "description", content: "Drag-and-drop a PDF offer letter to scan for risky clauses." }] }),
+  head: () => ({ meta: [{ title: "AI PDF Offer Letter Analyzer — ScamShield" }, { name: "description", content: "Upload appointment letters, internship descriptions, or training agreements to scan for hidden financial traps and fraudulent compliance clauses." }] }),
 });
 
 type ScanResult = ReturnType<typeof scanText> & { file: { name: string; size: number } };
