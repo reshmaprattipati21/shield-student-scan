@@ -13,13 +13,6 @@ export const Route = createFileRoute("/pdf-analyzer")({
 });
 
 type ScanResult = ReturnType<typeof scanText> & { file: { name: string; size: number } };
-
-const GENERIC_CLAUSES = [
-  "Requires upfront security deposit before joining",
-  "Mentions crypto / wallet-only payouts",
-  "Promises guaranteed earnings without performance criteria",
-  "Asks for personal banking or government IDs at offer stage",
-  "Uses pressure language ('limited slots', 'act fast')",
 ];
 
 async function readPdfText(file: File): Promise<string> {
