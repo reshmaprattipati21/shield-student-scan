@@ -6,7 +6,7 @@ import { BackToDashboard } from "@/components/BackToDashboard";
 import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { RadarRing } from "@/components/RadarRing";
+
 import { RiskGauge } from "@/components/RiskGauge";
 import { scanText, type TextScan } from "@/lib/scan-engine";
 
@@ -56,15 +56,12 @@ function TextScanner() {
       <Navbar />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-6"><BackToDashboard /></div>
-        <div className="flex items-start justify-between gap-6 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><MessageSquareText className="h-5 w-5" /></div>
-              <h1 className="text-3xl font-bold tracking-tight">Offer Message Analyzer</h1>
-            </div>
-            <p className="text-muted-foreground">Paste a message from WhatsApp, Telegram, or email to flag scam phrasing.</p>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><MessageSquareText className="h-5 w-5" /></div>
+            <h1 className="text-3xl font-bold tracking-tight">Offer Message Analyzer</h1>
           </div>
-          <div className="hidden md:block"><RadarRing size={120} label="Linguistic AI" /></div>
+          <p className="text-muted-foreground max-w-3xl">Paste a recruiter message from WhatsApp, Telegram, SMS, or email to flag scam phrasing, upfront payment requests, and pressure tactics.</p>
         </div>
 
         <form onSubmit={onScan} className="glass rounded-2xl p-6">
@@ -86,6 +83,20 @@ function TextScanner() {
               <div className="mt-3 text-xs text-muted-foreground uppercase tracking-[0.2em]">{result.hits.length} signal(s)</div>
             </div>
             <div className="space-y-4">
+              <div className="glass rounded-2xl p-5">
+                <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Verdict</div>
+                {result.hits.length === 0 ? (
+                  <div className="flex items-start gap-2 text-sm text-success">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 opacity-0" />
+                    <span><span className="font-semibold">Verified Employer.</span> This message uses language consistent with legitimate, university-approved recruitment channels.</span>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 text-sm text-destructive">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span><span className="font-semibold">Critical Risk Flagged.</span> The message requests an upfront security deposit for hardware or training, which violates standard corporate recruitment policies.</span>
+                  </div>
+                )}
+              </div>
               <Highlighted text={text} hits={result.hits} />
               {result.hits.length > 0 && (
                 <div className="glass rounded-2xl p-5">

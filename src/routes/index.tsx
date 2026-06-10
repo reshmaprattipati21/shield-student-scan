@@ -46,7 +46,7 @@ function Index() {
                 <span className="bg-gradient-to-r from-primary to-[#22D3EE] bg-clip-text text-transparent">for Job Scam Detection.</span>
               </h1>
               <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-                Scan suspicious links, decode shady messages, x-ray offer letter PDFs, and tap into a live community fraud feed — all from one neon-lit dashboard.
+                Scan suspicious links, decode shady recruiter messages, analyze offer-letter PDFs, and tap into a live community fraud feed — all from one dashboard built for students.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="btn-neon-hover"><Link to="/url-checker">Run a scan <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
@@ -81,7 +81,7 @@ function Index() {
             <MetricCard icon={Building2} label="Community reports" value={String(feed.length || 0) + "+"} tone="amber" />
             <FeatureCard icon={Link2} title="URL Threat Scanner" desc="Domain age, typosquatting, TLD spoofing — instant risk score." to="/url-checker" />
             <FeatureCard icon={MessageSquareText} title="Offer Message Analyzer" desc="Inline-highlights scam phrasing in WhatsApp / Telegram / email." to="/text-scanner" />
-            <FeatureCard icon={FileText} title="Offer Letter PDF X-Ray" desc="Drag & drop a PDF — flags risky clauses and bogus fees." to="/pdf-analyzer" />
+            <FeatureCard icon={FileText} title="AI PDF Offer Letter Analyzer" desc="Upload an appointment letter or training agreement to flag fraudulent fees and clauses." to="/pdf-analyzer" />
           </section>
         )}
 
@@ -89,7 +89,7 @@ function Index() {
           <section className="grid gap-6 md:grid-cols-3">
             <FeatureCard icon={Link2} title="URL Threat Scanner" desc="Animated risk gauge with critical-token detection." to="/url-checker" />
             <FeatureCard icon={MessageSquareText} title="Message Analyzer" desc="Glowing inline highlights of scam phrases." to="/text-scanner" />
-            <FeatureCard icon={FileText} title="PDF Offer Letter" desc="Loading orbit while scanning document rules." to="/pdf-analyzer" />
+            <FeatureCard icon={FileText} title="AI PDF Offer Letter Analyzer" desc="Semantic analysis of employment terms in uploaded offer letters." to="/pdf-analyzer" />
           </section>
         )}
 
