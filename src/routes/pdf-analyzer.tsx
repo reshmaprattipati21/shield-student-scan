@@ -105,7 +105,7 @@ function PdfAnalyzer() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center text-cyan-300 font-semibold tabular-nums">{progress}%</div>
               </div>
-              <div className="text-sm text-cyan-200/80 tracking-wide">Scanning Document Rules…</div>
+              <div className="text-sm text-cyan-200/80 tracking-wide max-w-md">Parsing document metadata and running semantic analysis on employment terms…</div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
