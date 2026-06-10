@@ -34,15 +34,12 @@ function UrlChecker() {
       <Navbar />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <div className="mb-6"><BackToDashboard /></div>
-        <div className="flex items-start justify-between gap-6 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><Link2 className="h-5 w-5" /></div>
-              <h1 className="text-3xl font-bold tracking-tight">URL Threat Scanner</h1>
-            </div>
-            <p className="text-muted-foreground">Paste a suspicious internship or job offer link. Live AI shielding active.</p>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><Link2 className="h-5 w-5" /></div>
+            <h1 className="text-3xl font-bold tracking-tight">URL Threat Scanner</h1>
           </div>
-          <div className="hidden md:block"><RadarRing size={120} label="AI Shield" /></div>
+          <p className="text-muted-foreground max-w-3xl">Paste a suspicious internship or job offer link to check the domain against typosquatting, brand impersonation, and known scam patterns.</p>
         </div>
 
         <form onSubmit={onCheck} className="glass rounded-2xl p-6">
