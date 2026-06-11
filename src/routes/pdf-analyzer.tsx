@@ -6,6 +6,7 @@ import { BackToDashboard } from "@/components/BackToDashboard";
 import { CyberBg } from "@/components/CyberBg";
 import { RiskGauge } from "@/components/RiskGauge";
 import { scanText } from "@/lib/scan-engine";
+import { recordScan } from "@/lib/scan-history";
 
 export const Route = createFileRoute("/pdf-analyzer")({
   component: PdfAnalyzer,
@@ -49,8 +50,10 @@ function PdfAnalyzer() {
     const text = await readPdfText(file);
     await new Promise((r) => setTimeout(r, dur));
     const base = scanText(text);
-    setResult({ ...base, file: { name: file.name, size: file.size } });
+    const final = { ...base, file: { name: file.name, size: file.size } };
+    setResult(final);
     setScanning(false);
+    void recordScan({ scan_type: "pdf", target: file.name, score: base.score, risk: base.risk });
   };
 
   const onDrop = (e: React.DragEvent) => {

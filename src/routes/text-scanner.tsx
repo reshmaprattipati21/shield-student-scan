@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { RiskGauge } from "@/components/RiskGauge";
 import { scanText, type TextScan } from "@/lib/scan-engine";
+import { recordScan } from "@/lib/scan-history";
 
 export const Route = createFileRoute("/text-scanner")({
   component: TextScanner,
@@ -47,7 +48,10 @@ function TextScanner() {
   const onScan = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
-    setResult(scanText(text));
+    const r = scanText(text);
+    setResult(r);
+    const preview = text.trim().slice(0, 80).replace(/\s+/g, " ") + (text.length > 80 ? "…" : "");
+    void recordScan({ scan_type: "text", target: preview, score: r.score, risk: r.risk });
   };
 
   return (
