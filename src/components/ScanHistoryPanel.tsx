@@ -1,8 +1,6 @@
-import { Link2, MessageSquareText, FileText, History, ShieldCheck, ShieldAlert, Shield } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link2, MessageSquareText, FileText, History, ShieldCheck, ShieldAlert, Shield, AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useScanHistory, type ScanType } from "@/lib/scan-history";
-import { useAuth } from "@/lib/auth-context";
 
 const ICONS: Record<ScanType, typeof Link2> = {
   url: Link2,
@@ -19,13 +17,13 @@ const LABELS: Record<ScanType, string> = {
 function badgeFor(risk: string, score: number) {
   const r = risk.toLowerCase();
   if (r === "high") return { cls: "bg-destructive/15 text-destructive border-destructive/40", label: `${score}% High Risk`, Icon: ShieldAlert };
+  if (r === "medium-high") return { cls: "bg-orange-500/15 text-orange-300 border-orange-400/40", label: `${score}% Medium-High`, Icon: AlertTriangle };
   if (r === "medium") return { cls: "bg-amber-500/15 text-amber-300 border-amber-400/40", label: `${score}% Medium`, Icon: Shield };
   return { cls: "bg-emerald-500/15 text-emerald-300 border-emerald-400/40", label: `Safe`, Icon: ShieldCheck };
 }
 
 export function ScanHistoryPanel() {
-  const { user } = useAuth();
-  const { items, loading } = useScanHistory(12);
+  const { items } = useScanHistory(12);
 
   return (
     <aside
@@ -46,13 +44,7 @@ export function ScanHistoryPanel() {
         </div>
       </div>
 
-      {!user ? (
-        <div className="text-sm text-muted-foreground py-6 text-center">
-          <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to track your scan history.
-        </div>
-      ) : loading ? (
-        <div className="text-xs text-muted-foreground py-6 text-center">Loading…</div>
-      ) : items.length === 0 ? (
+      {items.length === 0 ? (
         <div className="text-sm text-muted-foreground py-6 text-center">
           No scans yet. Run your first scan to start building your history.
         </div>
@@ -77,6 +69,15 @@ export function ScanHistoryPanel() {
                   <div className="text-xs uppercase tracking-[0.18em] text-cyan-300/70">{LABELS[it.scan_type]}</div>
                   <div className="text-sm font-medium truncate" title={it.target}>{it.target}</div>
                   <div className="text-[11px] text-muted-foreground">{formatDistanceToNow(new Date(it.created_at), { addSuffix: true })}</div>
+                  {it.flags && it.flags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {it.flags.map((f, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 rounded border border-orange-400/40 bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-medium text-orange-300">
+                          <AlertTriangle className="h-2.5 w-2.5" /> {f}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${b.cls}`}>
                   <b.Icon className="h-3 w-3" /> {b.label}

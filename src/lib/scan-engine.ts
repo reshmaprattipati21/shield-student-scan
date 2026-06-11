@@ -49,11 +49,48 @@ export type TextScan = {
   risk: Risk;
   score: number;
   hits: { phrase: string; reason: string; weight: number; index: number; length: number }[];
+  flags: string[]; // extra warning badges, e.g. impersonation risk
 };
+
+// Phrases that indicate aggressive "you've been selected" outreach,
+// commonly used by scammers spoofing local colleges / training partners.
+const SELECTION_PATTERNS = [
+  "congratulations you've been selected",
+  "congratulations you have been selected",
+  "you've been selected",
+  "you have been selected",
+  "selected for internship",
+  "selected for an internship",
+  "offering direct internship",
+  "direct internship offer",
+  "direct joining",
+  "instant joining",
+  "no interview required",
+];
+
+// Signals that a message likely came from a legitimate, formal recruitment process.
+const FORMAL_PROCESS_SIGNALS = [
+  "interview scheduled",
+  "interview round",
+  "technical interview",
+  "hr interview",
+  "campus placement",
+  "placement cell",
+  "official offer letter",
+  "@ac.in",
+  ".edu",
+  ".edu.in",
+  "ac.in/",
+];
+
+// Detect a college / institution mention that scammers might spoof for false trust.
+const INSTITUTION_PATTERN =
+  /\b(college of (engineering|technology|science|arts)|institute of technology|university|polytechnic|iit\b|iiit\b|nit\b|mvgr|gitam|andhra|jntu|vit\b|srm\b|amrita|manipal|bits\b)\b/i;
 
 export function scanText(text: string): TextScan {
   const lower = text.toLowerCase();
   const hits: TextScan["hits"] = [];
+  const flags: string[] = [];
   let score = 0;
   let critical = false;
   for (const r of TEXT_RULES) {
@@ -71,10 +108,34 @@ export function scanText(text: string): TextScan {
       if (r.critical) critical = true;
     }
   }
+
+  // Institutional impersonation heuristic:
+  // aggressive "selected" language + (institution name OR no formal process signal)
+  // => spike score and add a dedicated warning badge.
+  const hasSelection = SELECTION_PATTERNS.some((p) => lower.includes(p));
+  const hasFormal = FORMAL_PROCESS_SIGNALS.some((s) => lower.includes(s));
+  const mentionsInstitution = INSTITUTION_PATTERN.test(text);
+  if (hasSelection && !hasFormal) {
+    flags.push("Impersonation Risk: Unverified Institutional Offer");
+    // Pin to at least 65% Medium-High range without overriding a stronger critical signal.
+    score = Math.max(score, mentionsInstitution ? 70 : 65);
+    hits.push({
+      phrase: "unsolicited selection",
+      reason: mentionsInstitution
+        ? "Aggressive 'you've been selected' language tied to an institution, with no formal interview or official email domain"
+        : "Aggressive 'you've been selected' language with no formal interview or official email domain",
+      weight: 0,
+      index: 0,
+      length: 0,
+    });
+  }
+
   if (critical) score = Math.max(score, 88);
   score = Math.min(100, score);
-  const risk: Risk = score >= 60 || critical ? "High" : score >= 25 ? "Medium" : "Low";
-  return { risk, score, hits };
+  // Tier mapping kept compatible with the 3-color gauge (Low/Medium/High).
+  // 65-79 surfaces as "Medium" + the impersonation badge above.
+  const risk: Risk = score >= 80 || critical ? "High" : score >= 25 ? "Medium" : "Low";
+  return { risk, score, hits, flags };
 }
 
 // ---------- URL scanner ----------
