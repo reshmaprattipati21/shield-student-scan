@@ -100,6 +100,15 @@ function TextScanner() {
                     <span><span className="font-semibold">Critical Risk Flagged.</span> The message requests an upfront security deposit for hardware or training, which violates standard corporate recruitment policies.</span>
                   </div>
                 )}
+                {result.flags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {result.flags.map((f, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-orange-400/50 bg-orange-500/10 px-2.5 py-1 text-xs font-semibold text-orange-300">
+                        <AlertTriangle className="h-3.5 w-3.5" /> {f}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Highlighted text={text} hits={result.hits} />
               {result.hits.length > 0 && (

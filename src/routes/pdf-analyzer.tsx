@@ -53,7 +53,7 @@ function PdfAnalyzer() {
     const final = { ...base, file: { name: file.name, size: file.size } };
     setResult(final);
     setScanning(false);
-    void recordScan({ scan_type: "pdf", target: file.name, score: base.score, risk: base.risk });
+    recordScan({ scan_type: "pdf", target: file.name, score: base.score, risk: base.risk, flags: base.flags });
   };
 
   const onDrop = (e: React.DragEvent) => {

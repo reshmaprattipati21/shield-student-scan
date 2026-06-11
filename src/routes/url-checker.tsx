@@ -30,7 +30,7 @@ function UrlChecker() {
       const r = scanUrl(url.trim());
       setResult(r);
       setLoading(false);
-      void recordScan({ scan_type: "url", target: r.domain || url.trim(), score: r.score, risk: r.risk });
+      recordScan({ scan_type: "url", target: r.domain || url.trim(), score: r.score, risk: r.risk });
     }, 800);
   };
 
