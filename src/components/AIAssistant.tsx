@@ -4,6 +4,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { Bot, MessageSquare, Send, ShieldAlert, X, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { chatAssistant } from "@/lib/chat.functions";
+import { useAuth } from "@/lib/auth-context";
+
+const MONEY_RE = /\b(money|deposit|fee|fees|payment|laptop|hardware|equipment|kit)\b/i;
+const URL_RE = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|in|net|org|co|io|xyz|info|site|online|link)\b|\blink\b|\burl\b)/i;
 
 type Msg = {
   id: string;
@@ -76,6 +80,8 @@ export function AIAssistant() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const callChat = useServerFn(chatAssistant);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userEmail = (user as { email?: string } | null)?.email ?? "there";
 
   // Initialize welcome message client-side only to avoid SSR hydration mismatch on timestamps
   useEffect(() => {
@@ -85,10 +91,11 @@ export function AIAssistant() {
         role: "bot",
         ts: Date.now(),
         content:
-          "👋 Hi! I'm ScamShield AI — your security assistant.\n\nAsk me about a job offer, a recruiter message, a news article, or paste anything suspicious. I'll help you spot scams and fake news.",
+          `👋 Hello ${userEmail}, how can ScamShield evaluate your document security today?\n\n` +
+          `Paste a suspicious link, recruiter message, or describe an offer letter — I'll scan it for scam signals tailored to your account.`,
       },
     ]);
-  }, []);
+  }, [userEmail]);
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" });
@@ -108,6 +115,35 @@ export function AIAssistant() {
       setMessages((m) => [
         ...m,
         { id: uid(), role: "bot", danger: true, ts: Date.now(), content: dangerReply(threats) },
+      ]);
+      return;
+    }
+
+    // Contextual quick-match replies for highly common scam vectors
+    if (MONEY_RE.test(text)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: uid(),
+          role: "bot",
+          danger: true,
+          ts: Date.now(),
+          content:
+            "Warning: Official student recruitment programs never demand upfront funds for hardware processing. This heavily resembles a corporate equipment scam structure.",
+        },
+      ]);
+      return;
+    }
+    if (URL_RE.test(text)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: uid(),
+          role: "bot",
+          ts: Date.now(),
+          content:
+            "Analysis Indicator: Always inspect subdomains. Scammers frequently mask malicious links using dashes like tcs-jobs or infosys-portal to deceive university applicants.",
+        },
       ]);
       return;
     }

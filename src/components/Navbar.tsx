@@ -1,16 +1,16 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Shield, LogOut } from "lucide-react";
+import { Shield, LogOut, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { supabase } from "@/integrations/supabase/client";
+import { ScanHistoryDrawer } from "@/components/ScanHistoryDrawer";
 
 export function Navbar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/" });
+    await signOut();
+    router.navigate({ to: "/auth" });
   };
 
   return (
@@ -35,6 +35,13 @@ export function Navbar() {
           <Link to="/reports" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
             Feed
           </Link>
+          <ScanHistoryDrawer
+            trigger={
+              <button className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition inline-flex items-center gap-1.5">
+                <History className="h-4 w-4" /> Scan History
+              </button>
+            }
+          />
           {user ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="ml-2">
               <LogOut className="h-4 w-4 mr-2" />Sign out
