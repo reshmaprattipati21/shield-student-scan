@@ -3,19 +3,20 @@ import { useState, useEffect } from "react";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, setLocalUser, isAdminEmail } from "@/lib/auth-context";
+import { seedMockHistoryIfEmpty } from "@/lib/scan-history";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
-  validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "/" }),
+  validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "" }),
   head: () => ({ meta: [{ title: "Sign in — ScamShield" }] }),
 });
 
 const DEMO_EMAIL = "admin@scamshield.com";
 const DEMO_PASSWORD = "admin123";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function AuthPage() {
   const { user } = useAuth();
@@ -27,43 +28,37 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const routeFor = (mail: string) => search.redirect || (isAdminEmail(mail) ? "/reports" : "/");
+
   useEffect(() => {
-    if (user) router.navigate({ to: search.redirect });
+    if (user) {
+      const mail = (user as { email?: string }).email ?? "";
+      router.navigate({ to: search.redirect || (isAdminEmail(mail) ? "/reports" : "/") });
+    }
   }, [user, router, search.redirect]);
 
-  const signInOnly = async (mail: string, pass: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email: mail, password: pass });
-    if (error) throw error;
-  };
-
-  const signUpThenIn = async (mail: string, pass: string) => {
-    const signUp = await supabase.auth.signUp({
-      email: mail,
-      password: pass,
-      options: { emailRedirectTo: `${window.location.origin}/` },
-    });
-    if (signUp.error) throw signUp.error;
-    // If email confirmation is off the user has a session already; otherwise sign in to obtain one.
-    if (!signUp.data.session) {
-      const retry = await supabase.auth.signInWithPassword({ email: mail, password: pass });
-      if (retry.error) throw retry.error;
-    }
+  const completeLogin = (mail: string, kind: "signin" | "signup") => {
+    setLocalUser(mail);
+    seedMockHistoryIfEmpty();
+    toast.success(kind === "signup" ? "Account created — welcome!" : "Welcome back");
+    router.navigate({ to: routeFor(mail) });
   };
 
   const submitEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mail = email.trim();
+    if (!EMAIL_RE.test(mail)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     setLoading(true);
     try {
-      if (mode === "signup") {
-        await signUpThenIn(email, password);
-        toast.success("Account created — welcome!");
-      } else {
-        await signInOnly(email, password);
-        toast.success("Welcome back");
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Authentication failed";
-      toast.error(msg);
+      // Local-first auth: any valid email + password works. No external lockdown.
+      completeLogin(mail, mode);
     } finally {
       setLoading(false);
     }
@@ -74,21 +69,14 @@ function AuthPage() {
     setPassword(DEMO_PASSWORD);
     setLoading(true);
     try {
-      // Try sign in; if the demo account doesn't exist yet, create it once.
-      const first = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
-      if (first.error) {
-        await signUpThenIn(DEMO_EMAIL, DEMO_PASSWORD);
-      }
-      toast.success("Signed in as demo admin");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Demo sign-in failed");
+      completeLogin(DEMO_EMAIL, "signin");
     } finally {
       setLoading(false);
     }
   };
 
   const oauth = async (provider: "google" | "apple") => {
-    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/reports" });
+    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/" });
     if (result.error) toast.error(`${provider} sign-in failed`);
   };
 
@@ -112,7 +100,7 @@ function AuthPage() {
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
         <p className="text-sm text-muted-foreground text-center mt-1">
-          {mode === "signin" ? "Sign in to access the command center" : "Join ScamShield to report and review scams"}
+          {mode === "signin" ? "Sign in with any email to access your dashboard" : "Join ScamShield to report and review scams"}
         </p>
 
         <div className="grid grid-cols-2 gap-2 mt-6">
@@ -164,7 +152,7 @@ function AuthPage() {
             disabled={loading}
             className="w-full text-xs text-primary/80 hover:text-primary transition-colors duration-200 underline-offset-4 hover:underline"
           >
-            Use demo credentials (admin@scamshield.com / admin123)
+            Use admin demo (admin@scamshield.com)
           </button>
 
           <button

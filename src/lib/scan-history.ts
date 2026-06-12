@@ -15,6 +15,33 @@ const KEY = "scamshield:scan-history:v1";
 const EVENT = "scamshield:scan-history-change";
 const MAX = 50;
 
+export function seedMockHistoryIfEmpty() {
+  if (typeof window === "undefined") return;
+  const existing = read();
+  if (existing.length > 0) return;
+  const now = Date.now();
+  const mock: ScanHistoryEntry[] = [
+    {
+      id: `seed-${now}-1`,
+      scan_type: "url",
+      target: "internshala.com/internship/detail/sde-bangalore",
+      score: 8,
+      risk: "low",
+      created_at: new Date(now - 1000 * 60 * 30).toISOString(),
+    },
+    {
+      id: `seed-${now}-2`,
+      scan_type: "text",
+      target: "Congratulations! You've been pre-selected for a remote internship — please confirm…",
+      score: 42,
+      risk: "medium",
+      flags: ["Pending review"],
+      created_at: new Date(now - 1000 * 60 * 60 * 2).toISOString(),
+    },
+  ];
+  write(mock);
+}
+
 function read(): ScanHistoryEntry[] {
   if (typeof window === "undefined") return [];
   try {
