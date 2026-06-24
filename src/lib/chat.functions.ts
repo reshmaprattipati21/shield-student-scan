@@ -28,12 +28,12 @@ Style:
 export const chatAssistant = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const apiKey = process.env.AI_API_KEY;
+    const apiKey = process.env.LOVABLE_API_KEY || process.env.AI_API_KEY;
     if (!apiKey) {
-      return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
+      return { ok: false as const, error: "AI service is not configured. Set the LOVABLE_API_KEY environment variable." };
     }
 
-    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://api.openai.com/v1/chat/completions";
+    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1/chat/completions";
 
     try {
       const res = await fetch(gatewayUrl, {
