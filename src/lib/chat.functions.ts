@@ -28,12 +28,13 @@ Style:
 export const chatAssistant = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY || process.env.AI_API_KEY;
+    const apiKey = process.env.AI_API_KEY;
     if (!apiKey) {
-      return { ok: false as const, error: "AI service is not configured. Set the LOVABLE_API_KEY environment variable." };
+      return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
     }
 
-    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1/chat/completions";
+    // Google Gemini's OpenAI-compatible endpoint
+    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 
     try {
       const res = await fetch(gatewayUrl, {
@@ -43,7 +44,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gemini-1.5-flash",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...data.messages,
