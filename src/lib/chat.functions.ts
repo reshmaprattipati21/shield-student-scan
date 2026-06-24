@@ -45,7 +45,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
           "X-Title": "ScamShield",
         },
         body: JSON.stringify({
-          model: process.env.AI_MODEL || "meta-llama/llama-3.3-70b-instruct:free",
+          model: process.env.AI_MODEL || "openrouter/free",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...data.messages
