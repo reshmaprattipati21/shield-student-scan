@@ -33,29 +33,23 @@ export const chatAssistant = createServerFn({ method: "POST" })
       return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
     }
 
-    const gatewayUrl = process.env.AI_GATEWAY_URL || `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`;
+    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://openrouter.ai/api/v1/chat/completions";
 
     try {
-      // Map OpenAI format to Gemini format
-      const contents = data.messages.map((m: any) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }]
-      }));
-
       const res = await fetch(gatewayUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://shield-student-scan.vercel.app",
+          "X-Title": "ScamShield",
         },
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
-          },
-          contents: contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1000,
-          }
+          model: process.env.AI_MODEL || "google/gemini-2.0-flash-lite-preview-02-05:free",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...data.messages
+          ],
         }),
       });
 
@@ -72,7 +66,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
       }
 
       const json = await res.json();
-      const reply: string = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+      const reply: string = json?.choices?.[0]?.message?.content?.trim() ?? "";
       if (!reply) {
         return { ok: false as const, error: "Empty response from the assistant. Try rephrasing your question." };
       }
