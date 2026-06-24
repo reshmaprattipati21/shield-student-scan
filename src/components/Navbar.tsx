@@ -10,7 +10,7 @@ export function Navbar() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.navigate({ to: "/auth" });
+    router.navigate({ to: "/auth", search: { redirect: "" } });
   };
 
   return (
@@ -48,7 +48,7 @@ export function Navbar() {
             </Button>
           ) : (
             <Button asChild size="sm" className="ml-2">
-              <Link to="/auth">Sign in</Link>
+              <Link to="/auth" search={{ redirect: "" }}>Sign in</Link>
             </Button>
           )}
         </nav>

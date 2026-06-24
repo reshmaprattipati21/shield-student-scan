@@ -237,7 +237,12 @@ export function scanUrl(rawUrl: string): UrlScan {
   if (mockAgeDays < 90) { signals.push({ label: `Domain age: ~${mockAgeDays} days (very new)`, bad: true }); score += 25; }
   else signals.push({ label: `Domain age: ~${Math.round(mockAgeDays / 365)} years`, bad: false });
 
-  if (critical) score = Math.max(score, 85 + Math.floor(Math.random() * 14));
+  if (critical) {
+    // Deterministic bump: hash the hostname to a stable value in [0, 13]
+    let h = 0;
+    for (let i = 0; i < host.length; i++) h = ((h << 5) - h + host.charCodeAt(i)) | 0;
+    score = Math.max(score, 85 + (((h % 14) + 14) % 14));
+  }
   score = Math.min(100, score);
   const risk: Risk = score >= 60 || critical ? "High" : score >= 30 ? "Medium" : "Low";
   return { risk, score, signals, domain: host };

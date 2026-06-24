@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithOAuth } from "@/integrations/supabase/auth";
 import { toast } from "sonner";
 import { useAuth, setLocalUser, isAdminEmail } from "@/lib/auth-context";
 import { seedMockHistoryIfEmpty } from "@/lib/scan-history";
@@ -76,8 +76,8 @@ function AuthPage() {
   };
 
   const oauth = async (provider: "google" | "apple") => {
-    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/" });
-    if (result.error) toast.error(`${provider} sign-in failed`);
+    const result = await signInWithOAuth(provider, { redirect_uri: window.location.origin + "/" });
+    if ("error" in result && result.error) toast.error(`${provider} sign-in failed`);
   };
 
   return (

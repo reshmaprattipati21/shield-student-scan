@@ -35,7 +35,13 @@ function PdfAnalyzer() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
   const runScan = async (file: File) => {
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum is 10 MB.`);
+      return;
+    }
     setScanning(true);
     setResult(null);
     setProgress(0);
