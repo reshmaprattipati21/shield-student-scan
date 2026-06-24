@@ -61,7 +61,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
       if (!res.ok) {
         const body = await res.text();
         console.error("AI gateway error", res.status, body);
-        return { ok: false as const, error: "The assistant is temporarily unavailable. Please try again." };
+        return { ok: false as const, error: `API Error ${res.status}: ${body}` };
       }
 
       const json = await res.json();
