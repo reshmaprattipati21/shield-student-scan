@@ -33,7 +33,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
       return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
     }
 
-    const gatewayUrl = process.env.AI_GATEWAY_URL || `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+    const gatewayUrl = process.env.AI_GATEWAY_URL || `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
     try {
       // Map OpenAI format to Gemini format
