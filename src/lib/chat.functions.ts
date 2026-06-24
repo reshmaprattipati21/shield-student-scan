@@ -33,22 +33,29 @@ export const chatAssistant = createServerFn({ method: "POST" })
       return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
     }
 
-    // Google Gemini's OpenAI-compatible endpoint
-    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+    const gatewayUrl = process.env.AI_GATEWAY_URL || `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     try {
+      // Map OpenAI format to Gemini format
+      const contents = data.messages.map((m: any) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }]
+      }));
+
       const res = await fetch(gatewayUrl, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gemini-1.5-flash",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...data.messages,
-          ],
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT }]
+          },
+          contents: contents,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1000,
+          }
         }),
       });
 
@@ -65,7 +72,7 @@ export const chatAssistant = createServerFn({ method: "POST" })
       }
 
       const json = await res.json();
-      const reply: string = json?.choices?.[0]?.message?.content?.trim() ?? "";
+      const reply: string = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
       if (!reply) {
         return { ok: false as const, error: "Empty response from the assistant. Try rephrasing your question." };
       }
