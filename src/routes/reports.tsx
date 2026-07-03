@@ -17,29 +17,10 @@ export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Community Reports — ScamShield" }, { name: "description", content: "Browse and submit student-reported internship and job scams." }] }),
 });
 
-type Report = {
-  id: string;
-  user_id: string;
-  company_name: string;
-  platform: string;
-  description: string;
-  created_at: string;
-};
-
 function Reports() {
   const { user, loading: authLoading } = useAuth();
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items: reports, loading, reload } = useReports();
   const [showForm, setShowForm] = useState(false);
-
-  const load = async () => {
-    const { data, error } = await supabase.from("scam_reports").select("*").order("created_at", { ascending: false }).limit(100);
-    if (error) toast.error(error.message);
-    else setReports(data ?? []);
-    setLoading(false);
-  };
-
-  useEffect(() => { if (user) load(); else setLoading(false); }, [user]);
 
   if (!authLoading && !user) {
     return (
