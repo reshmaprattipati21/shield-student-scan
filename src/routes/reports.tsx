@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Users, Building2, Plus, Trash2, Flag } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { BackToDashboard } from "@/components/BackToDashboard";
@@ -7,8 +7,8 @@ import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { addReport, deleteReport, useReports } from "@/lib/reports-store";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -17,29 +17,10 @@ export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Community Reports — ScamShield" }, { name: "description", content: "Browse and submit student-reported internship and job scams." }] }),
 });
 
-type Report = {
-  id: string;
-  user_id: string;
-  company_name: string;
-  platform: string;
-  description: string;
-  created_at: string;
-};
-
 function Reports() {
   const { user, loading: authLoading } = useAuth();
-  const [reports, setReports] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items: reports, loading, reload } = useReports();
   const [showForm, setShowForm] = useState(false);
-
-  const load = async () => {
-    const { data, error } = await supabase.from("scam_reports").select("*").order("created_at", { ascending: false }).limit(100);
-    if (error) toast.error(error.message);
-    else setReports(data ?? []);
-    setLoading(false);
-  };
-
-  useEffect(() => { if (user) load(); else setLoading(false); }, [user]);
 
   if (!authLoading && !user) {
     return (
@@ -76,7 +57,7 @@ function Reports() {
           </Button>
         </div>
 
-        {showForm && <ReportForm onSubmitted={() => { setShowForm(false); load(); }} />}
+        {showForm && <ReportForm onSubmitted={() => { setShowForm(false); reload(); }} />}
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
@@ -105,7 +86,7 @@ function Reports() {
                       >
                         <Flag className="h-3.5 w-3.5" /> Report as Scam
                       </button>
-                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={load} />}
+                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={reload} />}
                     </div>
                   </div>
                 </li>
@@ -119,10 +100,10 @@ function Reports() {
 }
 
 function DeleteBtn({ id, onDone }: { id: string; onDone: () => void }) {
-  const del = async () => {
-    const { error } = await supabase.from("scam_reports").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("Report deleted"); onDone(); }
+  const del = () => {
+    deleteReport(id);
+    toast.success("Report deleted");
+    onDone();
   };
   return <Button size="sm" variant="ghost" onClick={del}><Trash2 className="h-4 w-4" /></Button>;
 }
@@ -142,14 +123,18 @@ function ReportForm({ onSubmitted }: { onSubmitted: () => void }) {
     if (description.trim().length < 10 || description.length > 2000) return toast.error("Description must be 10–2000 chars");
 
     setSubmitting(true);
-    const { error } = await supabase.from("scam_reports").insert({
-      user_id: user.id,
-      company_name: company.trim(),
-      platform: platform.trim(),
-      description: description.trim(),
-    });
+    try {
+      addReport({
+        user_id: user.id,
+        company_name: company.trim(),
+        platform: platform.trim(),
+        description: description.trim(),
+      });
+    } catch (err) {
+      setSubmitting(false);
+      return toast.error(err instanceof Error ? err.message : "Failed to submit report");
+    }
     setSubmitting(false);
-    if (error) return toast.error(error.message);
     toast.success("Report submitted");
     setCompany(""); setPlatform(""); setDescription("");
     onSubmitted();
