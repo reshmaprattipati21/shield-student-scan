@@ -100,10 +100,10 @@ function Reports() {
 }
 
 function DeleteBtn({ id, onDone }: { id: string; onDone: () => void }) {
-  const del = async () => {
-    const { error } = await supabase.from("scam_reports").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("Report deleted"); onDone(); }
+  const del = () => {
+    deleteReport(id);
+    toast.success("Report deleted");
+    onDone();
   };
   return <Button size="sm" variant="ghost" onClick={del}><Trash2 className="h-4 w-4" /></Button>;
 }
