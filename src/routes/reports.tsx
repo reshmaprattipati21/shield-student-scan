@@ -57,7 +57,7 @@ function Reports() {
           </Button>
         </div>
 
-        {showForm && <ReportForm onSubmitted={() => { setShowForm(false); load(); }} />}
+        {showForm && <ReportForm onSubmitted={() => { setShowForm(false); reload(); }} />}
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
