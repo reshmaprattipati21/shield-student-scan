@@ -86,7 +86,7 @@ function Reports() {
                       >
                         <Flag className="h-3.5 w-3.5" /> Report as Scam
                       </button>
-                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={load} />}
+                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={reload} />}
                     </div>
                   </div>
                 </li>
