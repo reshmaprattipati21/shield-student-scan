@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Users, Building2, Plus, Trash2, Flag } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { BackToDashboard } from "@/components/BackToDashboard";
@@ -7,8 +7,8 @@ import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { addReport, deleteReport, useReports } from "@/lib/reports-store";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
