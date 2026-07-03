@@ -123,14 +123,18 @@ function ReportForm({ onSubmitted }: { onSubmitted: () => void }) {
     if (description.trim().length < 10 || description.length > 2000) return toast.error("Description must be 10–2000 chars");
 
     setSubmitting(true);
-    const { error } = await supabase.from("scam_reports").insert({
-      user_id: user.id,
-      company_name: company.trim(),
-      platform: platform.trim(),
-      description: description.trim(),
-    });
+    try {
+      addReport({
+        user_id: user.id,
+        company_name: company.trim(),
+        platform: platform.trim(),
+        description: description.trim(),
+      });
+    } catch (err) {
+      setSubmitting(false);
+      return toast.error(err instanceof Error ? err.message : "Failed to submit report");
+    }
     setSubmitting(false);
-    if (error) return toast.error(error.message);
     toast.success("Report submitted");
     setCompany(""); setPlatform(""); setDescription("");
     onSubmitted();
