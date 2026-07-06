@@ -27,11 +27,6 @@ export default defineConfig(({ mode }) => {
       ],
     },
     server: { host: "::", port: 8080 },
-    plugins: [
-      tanstackStart(),
-      nitro(),
-      react(),
-      tailwindcss(),
-    ],
+    plugins: [tanstackStart(), nitro(), react(), tailwindcss()],
   };
 });

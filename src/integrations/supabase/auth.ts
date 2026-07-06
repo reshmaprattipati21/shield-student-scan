@@ -8,10 +8,7 @@ type SignInOptions = {
  * OAuth sign-in via Supabase Auth.
  * Supports Google and Apple providers.
  */
-export async function signInWithOAuth(
-  provider: "google" | "apple",
-  opts?: SignInOptions,
-) {
+export async function signInWithOAuth(provider: "google" | "apple", opts?: SignInOptions) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {

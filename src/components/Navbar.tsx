@@ -20,19 +20,37 @@ export function Navbar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30 shadow-[0_0_16px_-2px_color-mix(in_oklab,var(--cyber-cyan)_50%,transparent)]">
             <Shield className="h-5 w-5" />
           </div>
-          <span>Scam<span className="text-primary">Shield</span></span>
+          <span>
+            Scam<span className="text-primary">Shield</span>
+          </span>
         </Link>
         <nav className="flex items-center gap-1">
-          <Link to="/url-checker" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+          <Link
+            to="/url-checker"
+            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition"
+            activeProps={{ className: "px-3 py-2 text-sm text-primary" }}
+          >
             URL
           </Link>
-          <Link to="/text-scanner" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+          <Link
+            to="/text-scanner"
+            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition"
+            activeProps={{ className: "px-3 py-2 text-sm text-primary" }}
+          >
             Message
           </Link>
-          <Link to="/pdf-analyzer" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+          <Link
+            to="/pdf-analyzer"
+            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition"
+            activeProps={{ className: "px-3 py-2 text-sm text-primary" }}
+          >
             PDF
           </Link>
-          <Link to="/reports" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition" activeProps={{ className: "px-3 py-2 text-sm text-primary" }}>
+          <Link
+            to="/reports"
+            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition"
+            activeProps={{ className: "px-3 py-2 text-sm text-primary" }}
+          >
             Feed
           </Link>
           <ScanHistoryDrawer
@@ -44,11 +62,14 @@ export function Navbar() {
           />
           {user ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="ml-2">
-              <LogOut className="h-4 w-4 mr-2" />Sign out
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign out
             </Button>
           ) : (
             <Button asChild size="sm" className="ml-2">
-              <Link to="/auth" search={{ redirect: "" }}>Sign in</Link>
+              <Link to="/auth" search={{ redirect: "" }}>
+                Sign in
+              </Link>
             </Button>
           )}
         </nav>

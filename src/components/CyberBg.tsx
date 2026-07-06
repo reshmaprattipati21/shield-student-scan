@@ -33,7 +33,11 @@ export function CyberBg() {
           <div
             key={c.key}
             className="col"
-            style={{ left: `${c.left}%`, animationDuration: `${c.dur}s`, animationDelay: `${c.delay}s` }}
+            style={{
+              left: `${c.left}%`,
+              animationDuration: `${c.dur}s`,
+              animationDelay: `${c.delay}s`,
+            }}
           >
             {c.chars}
           </div>

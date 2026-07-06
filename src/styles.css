@@ -45,7 +45,7 @@
   --foreground: oklch(0.97 0.012 230);
   --card: oklch(0.21 0.028 250);
   --card-foreground: oklch(0.97 0.012 230);
-  --popover: oklch(0.20 0.028 250);
+  --popover: oklch(0.2 0.028 250);
   --popover-foreground: oklch(0.97 0.012 230);
 
   --primary: oklch(0.82 0.14 210);
@@ -64,7 +64,7 @@
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.14 0.02 250);
 
-  --border: oklch(0.82 0.14 210 / 0.20);
+  --border: oklch(0.82 0.14 210 / 0.2);
   --input: oklch(0.21 0.028 250 / 0.7);
   --ring: oklch(0.82 0.14 210);
 
@@ -82,18 +82,36 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html, body { min-height: 100vh; }
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    min-height: 100vh;
+  }
   body {
     color: var(--color-foreground);
-    background-color: #0B0F19;
+    background-color: #0b0f19;
     background-image:
-      radial-gradient(ellipse 70% 60% at 50% -10%, color-mix(in oklab, var(--cyber-blue) 22%, transparent) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 95% 100%, color-mix(in oklab, var(--cyber-cyan) 14%, transparent) 0%, transparent 60%),
-      linear-gradient(to bottom, #0B0F19, #070A12);
+      radial-gradient(
+        ellipse 70% 60% at 50% -10%,
+        color-mix(in oklab, var(--cyber-blue) 22%, transparent) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 95% 100%,
+        color-mix(in oklab, var(--cyber-cyan) 14%, transparent) 0%,
+        transparent 60%
+      ),
+      linear-gradient(to bottom, #0b0f19, #070a12);
     background-attachment: fixed;
   }
-  main, header, footer { position: relative; z-index: 1; }
+  main,
+  header,
+  footer {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 @layer utilities {
@@ -110,7 +128,10 @@
     background: color-mix(in oklab, var(--background) 60%, transparent);
     backdrop-filter: blur(10px);
     border: 1px solid color-mix(in oklab, var(--cyber-cyan) 22%, transparent);
-    transition: border-color .5s ease, box-shadow .5s ease, background-color .5s ease;
+    transition:
+      border-color 0.5s ease,
+      box-shadow 0.5s ease,
+      background-color 0.5s ease;
   }
   .glass-input:focus-within,
   .glass-input:focus {
@@ -120,52 +141,143 @@
       0 0 28px color-mix(in oklab, var(--cyber-cyan) 35%, transparent);
   }
 
-  .glow-cyan    { box-shadow: var(--glow-cyan); }
-  .glow-crimson { box-shadow: var(--glow-crimson); }
-  .glow-amber   { box-shadow: var(--glow-amber); }
-  .glow-success { box-shadow: var(--glow-success); }
+  .glow-cyan {
+    box-shadow: var(--glow-cyan);
+  }
+  .glow-crimson {
+    box-shadow: var(--glow-crimson);
+  }
+  .glow-amber {
+    box-shadow: var(--glow-amber);
+  }
+  .glow-success {
+    box-shadow: var(--glow-success);
+  }
 
-  .text-glow-red    { color: #EF4444; text-shadow: 0 0 12px rgba(239,68,68,.7), 0 0 28px rgba(239,68,68,.45); animation: pulseGlowRed 1.6s ease-in-out infinite; }
-  .text-glow-amber  { color: #F59E0B; text-shadow: 0 0 12px rgba(245,158,11,.7), 0 0 28px rgba(245,158,11,.45); animation: pulseGlowAmber 1.8s ease-in-out infinite; }
-  .text-glow-green  { color: #10B981; text-shadow: 0 0 12px rgba(16,185,129,.7), 0 0 28px rgba(16,185,129,.45); animation: pulseGlowGreen 2s ease-in-out infinite; }
+  .text-glow-red {
+    color: #ef4444;
+    text-shadow:
+      0 0 12px rgba(239, 68, 68, 0.7),
+      0 0 28px rgba(239, 68, 68, 0.45);
+    animation: pulseGlowRed 1.6s ease-in-out infinite;
+  }
+  .text-glow-amber {
+    color: #f59e0b;
+    text-shadow:
+      0 0 12px rgba(245, 158, 11, 0.7),
+      0 0 28px rgba(245, 158, 11, 0.45);
+    animation: pulseGlowAmber 1.8s ease-in-out infinite;
+  }
+  .text-glow-green {
+    color: #10b981;
+    text-shadow:
+      0 0 12px rgba(16, 185, 129, 0.7),
+      0 0 28px rgba(16, 185, 129, 0.45);
+    animation: pulseGlowGreen 2s ease-in-out infinite;
+  }
 
   .scam-hit {
     color: #fecaca;
-    background: rgba(239,68,68,0.14);
-    border: 1px solid rgba(239,68,68,0.55);
+    background: rgba(239, 68, 68, 0.14);
+    border: 1px solid rgba(239, 68, 68, 0.55);
     border-radius: 0.375rem;
     padding: 0 0.3rem;
-    box-shadow: 0 0 12px rgba(239,68,68,0.45);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
     animation: pulseGlowRed 1.6s ease-in-out infinite;
   }
 
-  .btn-neon-hover { transition: transform .3s ease, box-shadow .5s ease, background-color .3s ease, border-color .3s ease; }
-  .btn-neon-hover:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px color-mix(in oklab, var(--cyber-cyan) 60%, transparent), 0 0 32px color-mix(in oklab, var(--cyber-cyan) 55%, transparent); }
-  .btn-neon-hover-red { transition: transform .3s ease, box-shadow .5s ease, background-color .3s ease, border-color .3s ease, color .3s ease; }
-  .btn-neon-hover-red:hover { transform: translateY(-1px); color: #fecaca; border-color: rgba(239,68,68,.7); box-shadow: 0 0 0 1px rgba(239,68,68,.7), 0 0 32px rgba(239,68,68,.55); }
+  .btn-neon-hover {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.5s ease,
+      background-color 0.3s ease,
+      border-color 0.3s ease;
+  }
+  .btn-neon-hover:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--cyber-cyan) 60%, transparent),
+      0 0 32px color-mix(in oklab, var(--cyber-cyan) 55%, transparent);
+  }
+  .btn-neon-hover-red {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.5s ease,
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+  .btn-neon-hover-red:hover {
+    transform: translateY(-1px);
+    color: #fecaca;
+    border-color: rgba(239, 68, 68, 0.7);
+    box-shadow:
+      0 0 0 1px rgba(239, 68, 68, 0.7),
+      0 0 32px rgba(239, 68, 68, 0.55);
+  }
 
   .radar-ring {
-    position: relative; border-radius: 9999px; overflow: hidden;
-    background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--cyber-cyan) 18%, transparent) 0%, transparent 60%);
+    position: relative;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--cyber-cyan) 18%, transparent) 0%,
+      transparent 60%
+    );
     border: 1px solid color-mix(in oklab, var(--cyber-cyan) 35%, transparent);
-    box-shadow: inset 0 0 30px color-mix(in oklab, var(--cyber-cyan) 16%, transparent), 0 0 28px color-mix(in oklab, var(--cyber-cyan) 18%, transparent);
+    box-shadow:
+      inset 0 0 30px color-mix(in oklab, var(--cyber-cyan) 16%, transparent),
+      0 0 28px color-mix(in oklab, var(--cyber-cyan) 18%, transparent);
   }
   .radar-ring::before {
-    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background: conic-gradient(from 0deg, transparent 0deg, color-mix(in oklab, var(--cyber-cyan) 70%, transparent) 60deg, transparent 100deg);
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      color-mix(in oklab, var(--cyber-cyan) 70%, transparent) 60deg,
+      transparent 100deg
+    );
     animation: radarSpin 3.2s linear infinite;
     mask: radial-gradient(circle, black 62%, transparent 100%);
   }
   .radar-ring::after {
-    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
     background:
-      repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 14px, color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 14px, color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 15px),
-      linear-gradient(0deg, transparent calc(50% - 0.5px), color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 50%, transparent calc(50% + 0.5px)),
-      linear-gradient(90deg, transparent calc(50% - 0.5px), color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 50%, transparent calc(50% + 0.5px));
+      repeating-radial-gradient(
+        circle at 50% 50%,
+        transparent 0,
+        transparent 14px,
+        color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 14px,
+        color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 15px
+      ),
+      linear-gradient(
+        0deg,
+        transparent calc(50% - 0.5px),
+        color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 50%,
+        transparent calc(50% + 0.5px)
+      ),
+      linear-gradient(
+        90deg,
+        transparent calc(50% - 0.5px),
+        color-mix(in oklab, var(--cyber-cyan) 22%, transparent) 50%,
+        transparent calc(50% + 0.5px)
+      );
   }
 
   .matrix-rain {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
     opacity: 0.03;
     background-image: repeating-linear-gradient(
       90deg,
@@ -178,23 +290,103 @@
     animation: matrixDrift 18s linear infinite;
   }
   .binary-track {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    opacity: 0.03; overflow: hidden; color: #22D3EE;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.03;
+    overflow: hidden;
+    color: #22d3ee;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px; line-height: 12px; letter-spacing: 1px; white-space: pre;
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    white-space: pre;
   }
   .binary-track .col {
-    position: absolute; top: -120%; width: 14px; text-align: center;
+    position: absolute;
+    top: -120%;
+    width: 14px;
+    text-align: center;
     animation: binaryFall linear infinite;
   }
 }
 
-@keyframes radarSpin { to { transform: rotate(360deg); } }
-@keyframes matrixDrift { from { background-position: 0 0; } to { background-position: 0 600px; } }
-@keyframes binaryFall { 0% { transform: translateY(0); } 100% { transform: translateY(220vh); } }
-@keyframes pulseGlowRed { 0%, 100% { text-shadow: 0 0 10px rgba(239,68,68,.55), 0 0 22px rgba(239,68,68,.35); } 50% { text-shadow: 0 0 18px rgba(239,68,68,.95), 0 0 40px rgba(239,68,68,.6); } }
-@keyframes pulseGlowAmber { 0%, 100% { text-shadow: 0 0 10px rgba(245,158,11,.55), 0 0 22px rgba(245,158,11,.35); } 50% { text-shadow: 0 0 18px rgba(245,158,11,.95), 0 0 40px rgba(245,158,11,.6); } }
-@keyframes pulseGlowGreen { 0%, 100% { text-shadow: 0 0 10px rgba(16,185,129,.55), 0 0 22px rgba(16,185,129,.35); } 50% { text-shadow: 0 0 18px rgba(16,185,129,.95), 0 0 40px rgba(16,185,129,.6); } }
-@keyframes gaugeSweep { from { stroke-dashoffset: var(--from); } to { stroke-dashoffset: var(--to); } }
-@keyframes spinSlow { to { transform: rotate(360deg); } }
-@keyframes spinReverse { to { transform: rotate(-360deg); } }
+@keyframes radarSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes matrixDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 600px;
+  }
+}
+@keyframes binaryFall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(220vh);
+  }
+}
+@keyframes pulseGlowRed {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(239, 68, 68, 0.55),
+      0 0 22px rgba(239, 68, 68, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 18px rgba(239, 68, 68, 0.95),
+      0 0 40px rgba(239, 68, 68, 0.6);
+  }
+}
+@keyframes pulseGlowAmber {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(245, 158, 11, 0.55),
+      0 0 22px rgba(245, 158, 11, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 18px rgba(245, 158, 11, 0.95),
+      0 0 40px rgba(245, 158, 11, 0.6);
+  }
+}
+@keyframes pulseGlowGreen {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(16, 185, 129, 0.55),
+      0 0 22px rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 18px rgba(16, 185, 129, 0.95),
+      0 0 40px rgba(16, 185, 129, 0.6);
+  }
+}
+@keyframes gaugeSweep {
+  from {
+    stroke-dashoffset: var(--from);
+  }
+  to {
+    stroke-dashoffset: var(--to);
+  }
+}
+@keyframes spinSlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinReverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}

@@ -1,6 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Shield, Link2, MessageSquareText, Users, FileText, Activity, ArrowRight, Building2 } from "lucide-react";
+import {
+  Shield,
+  Link2,
+  MessageSquareText,
+  Users,
+  FileText,
+  Activity,
+  ArrowRight,
+  Building2,
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { CyberBg } from "@/components/CyberBg";
 import { Button } from "@/components/ui/button";
@@ -14,7 +23,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ScamShield — Cyber Command Center for Job Scam Detection" },
-      { name: "description", content: "Detect fake internships and job scams: URL threat scanner, message analyzer, offer letter PDF scanner, and live community fraud feed." },
+      {
+        name: "description",
+        content:
+          "Detect fake internships and job scams: URL threat scanner, message analyzer, offer letter PDF scanner, and live community fraud feed.",
+      },
     ],
   }),
 });
@@ -26,7 +39,11 @@ function Index() {
   const [feed, setFeed] = useState<Feed[]>([]);
 
   useEffect(() => {
-    supabase.from("scam_reports").select("id, company_name, platform, created_at").order("created_at", { ascending: false }).limit(8)
+    supabase
+      .from("scam_reports")
+      .select("id, company_name, platform, created_at")
+      .order("created_at", { ascending: false })
+      .limit(8)
       .then(({ data }) => setFeed(data ?? []));
   }, []);
 
@@ -43,18 +60,31 @@ function Index() {
                 <Activity className="h-3.5 w-3.5 text-primary animate-pulse" /> AI Shield · online
               </div>
               <h1 className="mt-5 text-5xl md:text-6xl font-bold tracking-tight">
-                Cyber Command Center<br />
-                <span className="bg-gradient-to-r from-primary to-[#22D3EE] bg-clip-text text-transparent">for Job Scam Detection.</span>
+                Cyber Command Center
+                <br />
+                <span className="bg-gradient-to-r from-primary to-[#22D3EE] bg-clip-text text-transparent">
+                  for Job Scam Detection.
+                </span>
               </h1>
               <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-                Scan suspicious links, decode shady recruiter messages, analyze offer-letter PDFs, and tap into a live community fraud feed — all from one dashboard built for students.
+                Scan suspicious links, decode shady recruiter messages, analyze offer-letter PDFs,
+                and tap into a live community fraud feed — all from one dashboard built for
+                students.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="btn-neon-hover"><Link to="/url-checker">Run a scan <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-                <Button asChild size="lg" variant="secondary" className="btn-neon-hover"><Link to="/reports">View fraud feed</Link></Button>
+                <Button asChild size="lg" className="btn-neon-hover">
+                  <Link to="/url-checker">
+                    Run a scan <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="secondary" className="btn-neon-hover">
+                  <Link to="/reports">View fraud feed</Link>
+                </Button>
               </div>
             </div>
-            <div className="hidden md:block"><RadarRing size={180} label="Threat radar" /></div>
+            <div className="hidden md:block">
+              <RadarRing size={180} label="Threat radar" />
+            </div>
           </div>
         </section>
 
@@ -80,10 +110,30 @@ function Index() {
             <div className="grid gap-6 md:grid-cols-3">
               <MetricCard icon={Shield} label="Detection accuracy" value="98%" tone="green" />
               <MetricCard icon={Activity} label="Live scans today" value="1,247" tone="cyan" />
-              <MetricCard icon={Building2} label="Community reports" value={String(feed.length || 0) + "+"} tone="amber" />
-              <FeatureCard icon={Link2} title="URL Threat Scanner" desc="Domain age, typosquatting, TLD spoofing — instant risk score." to="/url-checker" />
-              <FeatureCard icon={MessageSquareText} title="Offer Message Analyzer" desc="Inline-highlights scam phrasing in WhatsApp / Telegram / email." to="/text-scanner" />
-              <FeatureCard icon={FileText} title="AI PDF Offer Letter Analyzer" desc="Upload an appointment letter or training agreement to flag fraudulent fees and clauses." to="/pdf-analyzer" />
+              <MetricCard
+                icon={Building2}
+                label="Community reports"
+                value={String(feed.length || 0) + "+"}
+                tone="amber"
+              />
+              <FeatureCard
+                icon={Link2}
+                title="URL Threat Scanner"
+                desc="Domain age, typosquatting, TLD spoofing — instant risk score."
+                to="/url-checker"
+              />
+              <FeatureCard
+                icon={MessageSquareText}
+                title="Offer Message Analyzer"
+                desc="Inline-highlights scam phrasing in WhatsApp / Telegram / email."
+                to="/text-scanner"
+              />
+              <FeatureCard
+                icon={FileText}
+                title="AI PDF Offer Letter Analyzer"
+                desc="Upload an appointment letter or training agreement to flag fraudulent fees and clauses."
+                to="/pdf-analyzer"
+              />
             </div>
             <ScanHistoryPanel />
           </section>
@@ -91,9 +141,24 @@ function Index() {
 
         {tab === "scan" && (
           <section className="grid gap-6 md:grid-cols-3">
-            <FeatureCard icon={Link2} title="URL Threat Scanner" desc="Animated risk gauge with critical-token detection." to="/url-checker" />
-            <FeatureCard icon={MessageSquareText} title="Message Analyzer" desc="Glowing inline highlights of scam phrases." to="/text-scanner" />
-            <FeatureCard icon={FileText} title="AI PDF Offer Letter Analyzer" desc="Semantic analysis of employment terms in uploaded offer letters." to="/pdf-analyzer" />
+            <FeatureCard
+              icon={Link2}
+              title="URL Threat Scanner"
+              desc="Animated risk gauge with critical-token detection."
+              to="/url-checker"
+            />
+            <FeatureCard
+              icon={MessageSquareText}
+              title="Message Analyzer"
+              desc="Glowing inline highlights of scam phrases."
+              to="/text-scanner"
+            />
+            <FeatureCard
+              icon={FileText}
+              title="AI PDF Offer Letter Analyzer"
+              desc="Semantic analysis of employment terms in uploaded offer letters."
+              to="/pdf-analyzer"
+            />
           </section>
         )}
 
@@ -104,15 +169,25 @@ function Index() {
             ) : (
               <ul className="divide-y divide-cyan-400/10">
                 {feed.map((r) => (
-                  <li key={r.id} className="p-4 flex items-center justify-between gap-3 hover:bg-cyan-400/5 transition-all duration-500">
+                  <li
+                    key={r.id}
+                    className="p-4 flex items-center justify-between gap-3 hover:bg-cyan-400/5 transition-all duration-500"
+                  >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-9 w-9 rounded-lg bg-destructive/15 text-destructive flex items-center justify-center shrink-0"><Building2 className="h-4 w-4" /></div>
+                      <div className="h-9 w-9 rounded-lg bg-destructive/15 text-destructive flex items-center justify-center shrink-0">
+                        <Building2 className="h-4 w-4" />
+                      </div>
                       <div className="min-w-0">
                         <div className="font-medium truncate">{r.company_name}</div>
-                        <div className="text-xs text-muted-foreground">on {r.platform} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</div>
+                        <div className="text-xs text-muted-foreground">
+                          on {r.platform} ·{" "}
+                          {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
+                        </div>
                       </div>
                     </div>
-                    <Link to="/reports" className="text-xs text-primary hover:underline">Open feed →</Link>
+                    <Link to="/reports" className="text-xs text-primary hover:underline">
+                      Open feed →
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -124,9 +199,22 @@ function Index() {
   );
 }
 
-function FeatureCard({ icon: Icon, title, desc, to }: { icon: typeof Shield; title: string; desc: string; to: string }) {
+function FeatureCard({
+  icon: Icon,
+  title,
+  desc,
+  to,
+}: {
+  icon: typeof Shield;
+  title: string;
+  desc: string;
+  to: string;
+}) {
   return (
-    <Link to={to} className="group glass rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--cyber-cyan)_70%,transparent)] hover:shadow-[0_20px_50px_-20px_color-mix(in_oklab,var(--cyber-cyan)_60%,transparent)]">
+    <Link
+      to={to}
+      className="group glass rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[color-mix(in_oklab,var(--cyber-cyan)_70%,transparent)] hover:shadow-[0_20px_50px_-20px_color-mix(in_oklab,var(--cyber-cyan)_60%,transparent)]"
+    >
       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">
         <Icon className="h-5 w-5" />
       </div>
@@ -139,8 +227,19 @@ function FeatureCard({ icon: Icon, title, desc, to }: { icon: typeof Shield; tit
   );
 }
 
-function MetricCard({ icon: Icon, label, value, tone }: { icon: typeof Shield; label: string; value: string; tone: "green" | "cyan" | "amber" }) {
-  const toneClass = tone === "green" ? "text-glow-green" : tone === "amber" ? "text-glow-amber" : "text-primary";
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof Shield;
+  label: string;
+  value: string;
+  tone: "green" | "cyan" | "amber";
+}) {
+  const toneClass =
+    tone === "green" ? "text-glow-green" : tone === "amber" ? "text-glow-amber" : "text-primary";
   return (
     <div className="glass rounded-2xl p-6">
       <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-cyan-300/80">

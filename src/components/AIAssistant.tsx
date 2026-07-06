@@ -7,7 +7,8 @@ import { chatAssistant } from "@/lib/chat.functions";
 import { useAuth } from "@/lib/auth-context";
 
 const MONEY_RE = /\b(money|deposit|fee|fees|payment|laptop|hardware|equipment|kit)\b/i;
-const URL_RE = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|in|net|org|co|io|xyz|info|site|online|link)\b|\blink\b|\burl\b)/i;
+const URL_RE =
+  /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|in|net|org|co|io|xyz|info|site|online|link)\b|\blink\b|\burl\b)/i;
 
 type Msg = {
   id: string;
@@ -18,16 +19,61 @@ type Msg = {
 };
 
 const SCAM_KEYWORDS: { keywords: string[]; label: string }[] = [
-  { keywords: ["urgent payment", "pay urgently", "pay now", "pay immediately"], label: "urgent payment" },
-  { keywords: ["work from home scam", "wfh guaranteed", "work from home guaranteed"], label: "work-from-home scam" },
-  { keywords: ["unrealistic salary", "earn ₹", "earn rs", "earn daily", "earn $500 a day", "lakhs per month guaranteed"], label: "unrealistic salary" },
-  { keywords: ["no company website", "no website", "can't find website"], label: "no company website" },
-  { keywords: ["fake certificate", "certificate scam", "buy certificate"], label: "fake certificate" },
-  { keywords: ["pay upfront", "send money", "transfer money", "pay money", "paying money"], label: "upfront payment" },
-  { keywords: ["telegram task", "telegram job", "telegram recruiter", "join telegram"], label: "Telegram task" },
-  { keywords: ["deposit", "security deposit", "refundable deposit", "registration fee", "processing fee", "training fee", "kyc fee"], label: "deposit / fee" },
-  { keywords: ["whatsapp recruiter", "whatsapp hr", "whatsapp +", "whatsapp job", "whatsapp offer"], label: "WhatsApp recruiter" },
-  { keywords: ["crypto", "usdt", "bitcoin", "wallet payment", "crypto payout"], label: "crypto payout" },
+  {
+    keywords: ["urgent payment", "pay urgently", "pay now", "pay immediately"],
+    label: "urgent payment",
+  },
+  {
+    keywords: ["work from home scam", "wfh guaranteed", "work from home guaranteed"],
+    label: "work-from-home scam",
+  },
+  {
+    keywords: [
+      "unrealistic salary",
+      "earn ₹",
+      "earn rs",
+      "earn daily",
+      "earn $500 a day",
+      "lakhs per month guaranteed",
+    ],
+    label: "unrealistic salary",
+  },
+  {
+    keywords: ["no company website", "no website", "can't find website"],
+    label: "no company website",
+  },
+  {
+    keywords: ["fake certificate", "certificate scam", "buy certificate"],
+    label: "fake certificate",
+  },
+  {
+    keywords: ["pay upfront", "send money", "transfer money", "pay money", "paying money"],
+    label: "upfront payment",
+  },
+  {
+    keywords: ["telegram task", "telegram job", "telegram recruiter", "join telegram"],
+    label: "Telegram task",
+  },
+  {
+    keywords: [
+      "deposit",
+      "security deposit",
+      "refundable deposit",
+      "registration fee",
+      "processing fee",
+      "training fee",
+      "kyc fee",
+    ],
+    label: "deposit / fee",
+  },
+  {
+    keywords: ["whatsapp recruiter", "whatsapp hr", "whatsapp +", "whatsapp job", "whatsapp offer"],
+    label: "WhatsApp recruiter",
+  },
+  {
+    keywords: ["crypto", "usdt", "bitcoin", "wallet payment", "crypto payout"],
+    label: "crypto payout",
+  },
 ];
 
 function detectThreats(text: string): string[] {
@@ -66,9 +112,17 @@ function uid() {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Verify Internship", prompt: "How do I verify if an internship offer is real?", route: "/url-checker" as const },
+  {
+    label: "Verify Internship",
+    prompt: "How do I verify if an internship offer is real?",
+    route: "/url-checker" as const,
+  },
   { label: "Detect Fake News", prompt: "How do I identify fake news articles?" },
-  { label: "Report Scam", prompt: "I want to report a scam I received.", route: "/reports" as const },
+  {
+    label: "Report Scam",
+    prompt: "I want to report a scam I received.",
+    route: "/reports" as const,
+  },
   { label: "Help", prompt: "What can you help me with?" },
 ];
 
@@ -156,7 +210,10 @@ export function AIAssistant() {
       }));
       const result = await callChat({ data: { messages: history } });
       if (result.ok) {
-        setMessages((m) => [...m, { id: uid(), role: "bot", ts: Date.now(), content: result.reply }]);
+        setMessages((m) => [
+          ...m,
+          { id: uid(), role: "bot", ts: Date.now(), content: result.reply },
+        ]);
       } else {
         setMessages((m) => [
           ...m,
@@ -167,7 +224,12 @@ export function AIAssistant() {
       console.error(err);
       setMessages((m) => [
         ...m,
-        { id: uid(), role: "bot", ts: Date.now(), content: "⚠️ I couldn't reach the assistant. Check your connection and try again." },
+        {
+          id: uid(),
+          role: "bot",
+          ts: Date.now(),
+          content: "⚠️ I couldn't reach the assistant. Check your connection and try again.",
+        },
       ]);
     } finally {
       setSending(false);
@@ -189,11 +251,16 @@ export function AIAssistant() {
         <span
           className="absolute inset-0 rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, color-mix(in oklab, var(--cyber-cyan) 35%, transparent) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--cyber-cyan) 35%, transparent) 0%, transparent 70%)",
             animation: "pulseGlowGreen 2s ease-in-out infinite",
           }}
         />
-        {open ? <X className="relative z-10 h-6 w-6" /> : <MessageSquare className="relative z-10 h-6 w-6" />}
+        {open ? (
+          <X className="relative z-10 h-6 w-6" />
+        ) : (
+          <MessageSquare className="relative z-10 h-6 w-6" />
+        )}
       </button>
 
       {/* Chat window */}
@@ -235,7 +302,10 @@ export function AIAssistant() {
           {/* Messages */}
           <div ref={scrollerRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
             {messages.map((m) => (
-              <div key={m.id} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
+              <div
+                key={m.id}
+                className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
+              >
                 <div
                   className={[
                     "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap shadow-sm",
@@ -250,7 +320,8 @@ export function AIAssistant() {
                       ? {
                           background: "color-mix(in oklab, var(--cyber-crimson) 22%, #1E293B)",
                           borderColor: "color-mix(in oklab, var(--cyber-crimson) 65%, transparent)",
-                          boxShadow: "0 0 24px color-mix(in oklab, var(--cyber-crimson) 30%, transparent)",
+                          boxShadow:
+                            "0 0 24px color-mix(in oklab, var(--cyber-crimson) 30%, transparent)",
                         }
                       : undefined
                   }
@@ -263,7 +334,9 @@ export function AIAssistant() {
                   )}
                   {m.content}
                 </div>
-                <div className="text-[10px] text-muted-foreground/60 mt-1 px-1">{formatTime(m.ts)}</div>
+                <div className="text-[10px] text-muted-foreground/60 mt-1 px-1">
+                  {formatTime(m.ts)}
+                </div>
               </div>
             ))}
 
@@ -271,9 +344,18 @@ export function AIAssistant() {
               <div className="flex items-start">
                 <div className="bg-[#1E293B] border border-[color-mix(in_oklab,var(--cyber-cyan)_25%,transparent)] rounded-2xl px-3.5 py-2.5 text-[13px] inline-flex items-center gap-2 text-foreground/80">
                   <span className="flex gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    />
                   </span>
                   Analyzing…
                 </div>
@@ -314,8 +396,17 @@ export function AIAssistant() {
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground/70"
                 disabled={sending}
               />
-              <Button size="icon" onClick={() => send()} disabled={!input.trim() || sending} className="h-8 w-8 rounded-lg">
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <Button
+                size="icon"
+                onClick={() => send()}
+                disabled={!input.trim() || sending}
+                className="h-8 w-8 rounded-lg"
+              >
+                {sending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <div className="mt-1.5 text-[10px] text-muted-foreground/70 text-center">

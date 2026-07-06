@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInWithOAuth } from "@/integrations/supabase/auth";
 import { toast } from "sonner";
-import { useAuth, setLocalUser, isAdminEmail } from "@/lib/auth-context";
+import { useAuth, isAdminEmail } from "@/lib/auth-context";
 import { seedMockHistoryIfEmpty } from "@/lib/scan-history";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -38,7 +39,6 @@ function AuthPage() {
   }, [user, router, search.redirect]);
 
   const completeLogin = (mail: string, kind: "signin" | "signup") => {
-    setLocalUser(mail);
     seedMockHistoryIfEmpty();
     toast.success(kind === "signup" ? "Account created — welcome!" : "Welcome back");
     router.navigate({ to: routeFor(mail) });
@@ -57,19 +57,23 @@ function AuthPage() {
     }
     setLoading(true);
     try {
-      // Local-first auth: any valid email + password works. No external lockdown.
-      completeLogin(mail, mode);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const useDemoLogin = async () => {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    setLoading(true);
-    try {
-      completeLogin(DEMO_EMAIL, "signin");
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email: mail,
+          password: password,
+        });
+        if (error) throw error;
+        toast.success("Check your email for the confirmation link!");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: mail,
+          password: password,
+        });
+        if (error) throw error;
+        completeLogin(mail, mode);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -100,12 +104,18 @@ function AuthPage() {
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
         <p className="text-sm text-muted-foreground text-center mt-1">
-          {mode === "signin" ? "Sign in with any email to access your dashboard" : "Join ScamShield to report and review scams"}
+          {mode === "signin"
+            ? "Sign in with any email to access your dashboard"
+            : "Join ScamShield to report and review scams"}
         </p>
 
         <div className="grid grid-cols-2 gap-2 mt-6">
-          <Button type="button" variant="secondary" onClick={() => oauth("google")}>Google</Button>
-          <Button type="button" variant="secondary" onClick={() => oauth("apple")}>Apple</Button>
+          <Button type="button" variant="secondary" onClick={() => oauth("google")}>
+            Google
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => oauth("apple")}>
+            Apple
+          </Button>
         </div>
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
@@ -148,19 +158,12 @@ function AuthPage() {
 
           <button
             type="button"
-            onClick={useDemoLogin}
-            disabled={loading}
-            className="w-full text-xs text-primary/80 hover:text-primary transition-colors duration-200 underline-offset-4 hover:underline"
-          >
-            Use admin demo (admin@scamshield.com)
-          </button>
-
-          <button
-            type="button"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             className="text-sm text-muted-foreground hover:text-foreground w-full text-center pt-1 transition-colors duration-200"
           >
-            {mode === "signin" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            {mode === "signin"
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Sign in"}
           </button>
         </form>
       </div>

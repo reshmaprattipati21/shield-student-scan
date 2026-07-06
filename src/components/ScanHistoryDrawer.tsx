@@ -1,5 +1,12 @@
 import { useState, type ReactNode } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ScanHistoryPanel } from "@/components/ScanHistoryPanel";
 
 export function ScanHistoryDrawer({ trigger }: { trigger: ReactNode }) {
@@ -13,7 +20,9 @@ export function ScanHistoryDrawer({ trigger }: { trigger: ReactNode }) {
       >
         <SheetHeader className="mb-4 text-left">
           <SheetTitle className="text-foreground">Your Unified Scan History</SheetTitle>
-          <SheetDescription>Every URL, message, and PDF you've checked across ScamShield.</SheetDescription>
+          <SheetDescription>
+            Every URL, message, and PDF you've checked across ScamShield.
+          </SheetDescription>
         </SheetHeader>
         <ScanHistoryPanel />
       </SheetContent>

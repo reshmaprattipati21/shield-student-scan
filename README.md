@@ -6,14 +6,14 @@ ScamShield is a student-focused cybersecurity web app that helps detect fake int
 
 ## ✨ Features
 
-| Module | Description |
-|---|---|
-| **URL Threat Scanner** | Paste a suspicious link — analyzes domain age, TLD, typosquatting, brand impersonation, and scam-keyword patterns. Animated risk gauge shows a 0–100 threat score. |
-| **Offer Message Analyzer** | Paste a WhatsApp/Telegram/email recruiter message — inline-highlights scam phrases (upfront fees, crypto payouts, pressure tactics) with per-phrase explanations. |
-| **AI PDF Offer Letter Analyzer** | Upload an appointment letter or training agreement — scans extracted text for hidden financial traps and fraudulent clauses. |
-| **Crowdsourced Fraud Feed** | Browse and submit student-reported scam companies. Authenticated with Supabase RLS. |
-| **AI Assistant Chatbot** | Floating AI assistant that detects threats in real-time and provides actionable safety advice. Powered by server-side AI gateway. |
-| **Unified Scan History** | All scans across modules are tracked locally with a slide-out drawer for review. |
+| Module                           | Description                                                                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **URL Threat Scanner**           | Paste a suspicious link — analyzes domain age, TLD, typosquatting, brand impersonation, and scam-keyword patterns. Animated risk gauge shows a 0–100 threat score. |
+| **Offer Message Analyzer**       | Paste a WhatsApp/Telegram/email recruiter message — inline-highlights scam phrases (upfront fees, crypto payouts, pressure tactics) with per-phrase explanations.  |
+| **AI PDF Offer Letter Analyzer** | Upload an appointment letter or training agreement — scans extracted text for hidden financial traps and fraudulent clauses.                                       |
+| **Crowdsourced Fraud Feed**      | Browse and submit student-reported scam companies. Authenticated with Supabase RLS.                                                                                |
+| **AI Assistant Chatbot**         | Floating AI assistant that detects threats in real-time and provides actionable safety advice. Powered by server-side AI gateway.                                  |
+| **Unified Scan History**         | All scans across modules are tracked locally with a slide-out drawer for review.                                                                                   |
 
 ---
 
@@ -58,16 +58,16 @@ cp .env.example .env
 
 Open `.env` and fill in your values:
 
-| Variable | Required | Description |
-|---|---|---|
-| `SUPABASE_PROJECT_ID` | ✅ | Your Supabase project ID |
-| `SUPABASE_URL` | ✅ | `https://<project-id>.supabase.co` |
-| `SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase service role key (server-side only) |
-| `VITE_SUPABASE_PROJECT_ID` | ✅ | Same as `SUPABASE_PROJECT_ID` (client-side) |
-| `VITE_SUPABASE_URL` | ✅ | Same as `SUPABASE_URL` (client-side) |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅ | Same as `SUPABASE_PUBLISHABLE_KEY` (client-side) |
-| `LOVABLE_API_KEY` | ❌ | Lovable AI gateway key (for AI chatbot) |
+| Variable                        | Required | Description                                      |
+| ------------------------------- | -------- | ------------------------------------------------ |
+| `SUPABASE_PROJECT_ID`           | ✅       | Your Supabase project ID                         |
+| `SUPABASE_URL`                  | ✅       | `https://<project-id>.supabase.co`               |
+| `SUPABASE_PUBLISHABLE_KEY`      | ✅       | Supabase anon/public key                         |
+| `SUPABASE_SERVICE_ROLE_KEY`     | ✅       | Supabase service role key (server-side only)     |
+| `VITE_SUPABASE_PROJECT_ID`      | ✅       | Same as `SUPABASE_PROJECT_ID` (client-side)      |
+| `VITE_SUPABASE_URL`             | ✅       | Same as `SUPABASE_URL` (client-side)             |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | ✅       | Same as `SUPABASE_PUBLISHABLE_KEY` (client-side) |
+| `AI_API_KEY`                    | ❌       | AI gateway key (for AI chatbot)                  |
 
 ### 4. Run Database Migrations
 

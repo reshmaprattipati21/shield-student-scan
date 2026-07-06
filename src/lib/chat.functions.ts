@@ -25,39 +25,49 @@ Style:
 - If unsure, say so and suggest verification steps.
 - Keep replies under ~180 words unless the user explicitly asks for detail.`;
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 export const chatAssistant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
     const apiKey = process.env.AI_API_KEY;
     if (!apiKey) {
-      return { ok: false as const, error: "AI service is not configured. Set the AI_API_KEY environment variable." };
+      return {
+        ok: false as const,
+        error: "AI service is not configured. Set the AI_API_KEY environment variable.",
+      };
     }
 
-    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://openrouter.ai/api/v1/chat/completions";
+    const gatewayUrl =
+      process.env.AI_GATEWAY_URL || "https://openrouter.ai/api/v1/chat/completions";
 
     try {
       const res = await fetch(gatewayUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "HTTP-Referer": "https://shield-student-scan.vercel.app",
           "X-Title": "ScamShield",
         },
         body: JSON.stringify({
           model: process.env.AI_MODEL || "openrouter/free",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...data.messages
-          ],
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...data.messages],
         }),
       });
 
       if (res.status === 429) {
-        return { ok: false as const, error: "Too many requests right now. Please wait a moment and try again." };
+        return {
+          ok: false as const,
+          error: "Too many requests right now. Please wait a moment and try again.",
+        };
       }
       if (res.status === 402) {
-        return { ok: false as const, error: "AI usage limit reached. Please add credits to continue." };
+        return {
+          ok: false as const,
+          error: "AI usage limit reached. Please add credits to continue.",
+        };
       }
       if (!res.ok) {
         const body = await res.text();
@@ -68,7 +78,10 @@ export const chatAssistant = createServerFn({ method: "POST" })
       const json = await res.json();
       const reply: string = json?.choices?.[0]?.message?.content?.trim() ?? "";
       if (!reply) {
-        return { ok: false as const, error: "Empty response from the assistant. Try rephrasing your question." };
+        return {
+          ok: false as const,
+          error: "Empty response from the assistant. Try rephrasing your question.",
+        };
       }
       return { ok: true as const, reply };
     } catch (err) {
