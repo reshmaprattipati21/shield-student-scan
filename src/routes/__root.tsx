@@ -11,7 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "@/components/ui/sonner";
-import { AIAssistant } from "@/components/AIAssistant";
+
 
 function NotFoundComponent() {
   return (
@@ -92,7 +92,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
-        <AIAssistant />
+
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
