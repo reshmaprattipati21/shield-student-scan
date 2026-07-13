@@ -1,6 +1,6 @@
 # 🛡️ ScamShield — Fake Internship & Job Scam Detection Platform
 
-ScamShield is a student-focused cybersecurity web app that helps detect fake internships, fraudulent job offers, and scam recruitment messages. Built with **TanStack Start**, **React 19**, **Supabase**, and deployed on **Cloudflare Workers**.
+ScamShield is a student-focused cybersecurity web app that helps detect fake internships, fraudulent job offers, and scam recruitment messages. Built with **TanStack Start**, **React 19**, and **Supabase**.
 
 ---
 
@@ -23,7 +23,7 @@ ScamShield is a student-focused cybersecurity web app that helps detect fake int
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + custom cyberpunk design system
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/) (Radix primitives)
 - **Backend**: [Supabase](https://supabase.com/) (Postgres, Auth, RLS)
-- **Deployment**: [Cloudflare Workers](https://workers.cloudflare.com/) via Wrangler
+
 - **AI**: Server-side chat via Lovable AI Gateway
 - **Package Manager**: npm
 
@@ -110,7 +110,7 @@ src/
 │   ├── text-scanner.tsx # Message analyzer
 │   ├── pdf-analyzer.tsx # PDF offer letter analyzer
 │   └── reports.tsx      # Crowdsourced fraud feed
-├── server.ts            # Cloudflare Workers SSR entry
+├── server.ts            # SSR entry
 ├── start.ts             # TanStack Start config + middleware
 ├── router.tsx           # Router factory
 └── styles.css           # Global Tailwind + cyberpunk theme
@@ -124,13 +124,6 @@ src/
 npm run build
 ```
 
-### Deploy to Cloudflare Workers
-
-```bash
-npx wrangler deploy
-```
-
-Make sure environment variables are set in the Cloudflare Workers dashboard or via `wrangler secret put`.
 
 ---
 
