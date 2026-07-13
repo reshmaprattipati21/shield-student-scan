@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Report = {
   id: string;
@@ -13,7 +14,9 @@ const KEY = "scamshield:reports:v1";
 const EVENT = "scamshield:reports-change";
 const MAX = 200;
 
-function read(): Report[] {
+// ─── localStorage helpers (fallback) ─────────────────────────────────────────
+
+function readLocal(): Report[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(KEY);
@@ -24,35 +27,13 @@ function read(): Report[] {
   }
 }
 
-function write(items: Report[]) {
+function writeLocal(items: Report[]) {
+  if (typeof window === "undefined") return;
   window.localStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
   window.dispatchEvent(new CustomEvent(EVENT));
 }
 
-function seedIfEmpty() {
-  if (read().length > 0) return;
-  const now = Date.now();
-  write([
-    {
-      id: `seed-${now}-1`,
-      user_id: "seed",
-      company_name: "BrightPath Interns",
-      platform: "WhatsApp",
-      description:
-        "Recruiter asked for a ₹2,500 'training kit' deposit before sharing the offer letter. No company website, only a Gmail address.",
-      created_at: new Date(now - 1000 * 60 * 45).toISOString(),
-    },
-    {
-      id: `seed-${now}-2`,
-      user_id: "seed",
-      company_name: "TCS-Internships-Portal",
-      platform: "Telegram",
-      description:
-        "Fake TCS lookalike domain (tcs-internships-portal.com) offering guaranteed placement after paying a ₹999 verification fee.",
-      created_at: new Date(now - 1000 * 60 * 60 * 5).toISOString(),
-    },
-  ]);
-}
+// ─── addReport — writes to localStorage AND Supabase ─────────────────────────
 
 export function addReport(input: {
   user_id: string;
@@ -68,27 +49,94 @@ export function addReport(input: {
     ...input,
     created_at: new Date().toISOString(),
   };
-  write([item, ...read()]);
+
+  // Write to localStorage for instant UI reactivity
+  writeLocal([item, ...readLocal()]);
+
+  // Also persist to Supabase
+  if (input.user_id) {
+    supabase
+      .from("scam_reports")
+      .insert({
+        user_id: input.user_id,
+        company_name: input.company_name,
+        platform: input.platform,
+        description: input.description,
+      })
+      .then(({ error }) => {
+        if (error) {
+          console.error("[Reports] Supabase insert failed:", error.message);
+        }
+      });
+  }
+
   return item;
 }
 
-export function deleteReport(id: string) {
-  write(read().filter((r) => r.id !== id));
+// ─── deleteReport — deletes from localStorage AND Supabase ───────────────────
+
+export function deleteReport(id: string, userId?: string) {
+  writeLocal(readLocal().filter((r) => r.id !== id));
+
+  // Also delete from Supabase
+  if (userId) {
+    supabase
+      .from("scam_reports")
+      .delete()
+      .eq("id", id)
+      .then(({ error }) => {
+        if (error) {
+          console.error("[Reports] Supabase delete failed:", error.message);
+        }
+      });
+  }
 }
 
-export function useReports() {
+// ─── useReports — reads from Supabase when authenticated, else localStorage ──
+
+export function useReports(userId?: string) {
   const [items, setItems] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
-    seedIfEmpty();
-    setItems(read());
-    setLoading(false);
-  }, []);
+  const load = useCallback(async () => {
+    if (userId) {
+      // Authenticated — fetch from Supabase
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("scam_reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("[Reports] Supabase fetch failed:", error.message);
+        // Fall back to localStorage
+        setItems(readLocal());
+      } else {
+        setItems(
+          (data ?? []).map((row) => ({
+            id: row.id,
+            user_id: row.user_id,
+            company_name: row.company_name,
+            platform: row.platform,
+            description: row.description,
+            created_at: row.created_at,
+          }))
+        );
+      }
+      setLoading(false);
+    } else {
+      // Unauthenticated — use localStorage
+      setItems(readLocal());
+      setLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
     load();
-    const onChange = () => setItems(read());
+
+    const onChange = () => {
+      load();
+    };
     window.addEventListener(EVENT, onChange);
     window.addEventListener("storage", onChange);
     return () => {

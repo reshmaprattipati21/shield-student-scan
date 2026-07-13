@@ -19,7 +19,7 @@ export const Route = createFileRoute("/reports")({
 
 function Reports() {
   const { user, loading: authLoading } = useAuth();
-  const { items: reports, loading, reload } = useReports();
+  const { items: reports, loading, reload } = useReports(user?.id);
   const [showForm, setShowForm] = useState(false);
 
   if (!authLoading && !user) {
@@ -86,7 +86,7 @@ function Reports() {
                       >
                         <Flag className="h-3.5 w-3.5" /> Report as Scam
                       </button>
-                      {r.user_id === user?.id && <DeleteBtn id={r.id} onDone={reload} />}
+                      {r.user_id === user?.id && <DeleteBtn id={r.id} userId={user?.id} onDone={reload} />}
                     </div>
                   </div>
                 </li>
@@ -99,9 +99,9 @@ function Reports() {
   );
 }
 
-function DeleteBtn({ id, onDone }: { id: string; onDone: () => void }) {
+function DeleteBtn({ id, userId, onDone }: { id: string; userId?: string; onDone: () => void }) {
   const del = () => {
-    deleteReport(id);
+    deleteReport(id, userId);
     toast.success("Report deleted");
     onDone();
   };
