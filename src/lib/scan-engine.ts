@@ -182,6 +182,7 @@ export const SUSPICIOUS_TLDS = [
   ".work",
   ".support",
   ".click",
+  ".abc",
 ];
 export const TRUSTED_BRANDS = [
   "google",
