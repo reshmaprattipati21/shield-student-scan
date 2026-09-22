@@ -170,156 +170,252 @@ export function scanText(text: string): TextScan {
   return { risk, score, hits, flags };
 }
 
-// ---------- URL scanner ----------
+/// ---------- URL scanner — Advanced Multi-Phase Architecture ----------
+
 export const SUSPICIOUS_TLDS = [
-  ".xyz",
-  ".top",
-  ".click",
-  ".info",
-  ".tk",
-  ".online",
-  ".live",
-  ".work",
-  ".support",
-  ".click",
-  ".abc",
+  ".xyz", ".top", ".click", ".info", ".tk", ".online",
+  ".live", ".work", ".support", ".abc", ".gq", ".ml",
+  ".cf", ".ga", ".buzz", ".icu", ".site", ".fun",
+  ".cc", ".ws", ".su", ".pw", ".surf", ".monster",
+  ".cam", ".wang", ".shop", ".vip", ".club", ".tokyo"
 ];
 export const TRUSTED_BRANDS = [
-  "google",
-  "microsoft",
-  "amazon",
-  "linkedin",
-  "meta",
-  "apple",
-  "facebook",
-  "internshala",
-  "naukri",
-  "indeed",
-  "wellsfargo",
-  "paypal",
+  "google", "microsoft", "amazon", "linkedin", "meta",
+  "apple", "facebook", "internshala", "naukri", "indeed",
+  "wellsfargo", "paypal", "netflix", "instagram", "twitter",
+  "whatsapp", "telegram", "dropbox", "github", "yahoo"
 ];
-// Brand names that scammers commonly impersonate via dash-style hostnames (e.g. "tcs-internships-portal.com")
 export const IMPERSONATED_BRANDS = [
-  "tcs",
-  "infosys",
-  "wipro",
-  "accenture",
-  "deloitte",
-  "tata",
-  "cognizant",
-  "capgemini",
-  "ibm",
-  "oracle",
-  "sap",
-  "hcl",
-  "techmahindra",
-  "mahindra",
-  "reliance",
-  "adani",
-  "google",
-  "microsoft",
-  "amazon",
-  "meta",
-  "apple",
-  "facebook",
-  "linkedin",
-  "internshala",
-  "naukri",
-  "indeed",
-  "unstop",
-  "letsintern",
+  "tcs", "infosys", "wipro", "accenture", "deloitte",
+  "tata", "cognizant", "capgemini", "ibm", "oracle",
+  "sap", "hcl", "techmahindra", "mahindra", "reliance",
+  "adani", "unstop", "letsintern",
+  "sbi", "hdfc", "icici", "axisbank", "paytm", "phonepe",
+  "gpay", "bhim", "upstox", "zerodha", "angelone",
+  "binance", "coinbase", "kraken", "kucoin", "trustwallet",
+  "metamask", "fedex", "dhl", "usps", "bluedart",
+  "google", "microsoft", "amazon", "linkedin", "meta",
+  "apple", "facebook", "internshala", "naukri", "indeed",
+  "wellsfargo", "paypal", "netflix", "instagram", "twitter",
+  "whatsapp", "telegram", "dropbox", "github", "yahoo"
 ];
 export const CRITICAL_URL_TOKENS = [
-  "task",
-  "earn",
-  "telegram-job",
-  "telegram_job",
-  "whatsapp-verification",
-  "whatsapp_verify",
-  "crypto-job",
-  "free-money",
-  "easyearn",
-  "quickcash",
-  "kyc-update",
-  "internships-portal",
-  "internship-portal",
-  "intern-portal",
-  "interns-portal",
-  "job-verification",
-  "jobs-verification",
-  "job-verify",
-  "career-portal",
-  "careers-portal",
-  "hr-portal",
-  "offer-letter",
-  "offer-verify",
-  "selection-letter",
+  "task", "earn", "telegram-job", "telegram_job",
+  "whatsapp-verification", "whatsapp_verify", "crypto-job",
+  "free-money", "easyearn", "quickcash", "kyc-update",
+  "internships-portal", "internship-portal", "intern-portal",
+  "job-verification", "job-verify", "career-portal",
+  "hr-portal", "offer-letter", "offer-verify", "selection-letter",
+  "login", "signin", "verify", "secure", "account", "update",
+  "confirm", "banking", "password", "credential",
+  "wallet", "kyc", "auth", "support", "helpdesk", "recovery",
+  "unlock", "billing", "invoice", "refund", "prize", "winner"
+];
+export const URL_SHORTENERS = [
+  "bit.ly", "t.co", "tinyurl.com", "goo.gl", "is.gd", "cli.gs",
+  "ow.ly", "yfrog.com", "tiny.cc", "tr.im", "su.pr",
+  "snipurl.com", "short.to", "wp.me", "rubyurl.com",
+  "to.ly", "bit.do", "lnkd.in", "db.tt", "qr.ae", "adf.ly", "soo.gd",
+  "cutt.ly", "cutt.us", "shorturl.at", "t.me"
 ];
 export const SUSPICIOUS_WORDS = [
-  "secure",
-  "verify",
-  "login",
-  "career",
-  "intern",
-  "hr",
-  "job",
-  "offer",
-  "payment",
-  "task",
-  "earn",
+  "secure", "verify", "login", "career", "intern", "hr",
+  "job", "offer", "payment", "task", "earn",
 ];
+
+const TRUSTED_DOMAINS = new Set([
+  "google.com", "youtube.com", "facebook.com", "amazon.com", "wikipedia.org",
+  "twitter.com", "x.com", "instagram.com", "linkedin.com", "reddit.com",
+  "microsoft.com", "apple.com", "github.com", "stackoverflow.com", "netflix.com",
+  "yahoo.com", "whatsapp.com", "zoom.us", "office.com", "live.com",
+  "naukri.com", "internshala.com", "indeed.com", "glassdoor.com", "unstop.com",
+  "flipkart.com", "myntra.com", "swiggy.com", "zomato.com", "paytm.com",
+  "tcs.com", "infosys.com", "wipro.com", "accenture.com",
+]);
 
 export type UrlScan = {
   risk: Risk;
   score: number;
   domain: string;
-  signals: { label: string; bad: boolean }[];
+  signals: { label: string; bad: boolean; phase?: number }[];
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function shannonEntropy(s: string): number {
+  if (!s) return 0;
+  const freq: Record<string, number> = {};
+  for (const c of s) freq[c] = (freq[c] || 0) + 1;
+  const len = s.length;
+  let ent = 0;
+  for (const k in freq) {
+    const p = freq[k] / len;
+    ent -= p * Math.log2(p);
+  }
+  return ent;
+}
+
+function recursiveDecode(url: string, maxIter = 3): { decoded: string; depth: number } {
+  for (let i = 0; i < maxIter; i++) {
+    const d = decodeURIComponent(url);
+    if (d === url) return { decoded: url, depth: i };
+    url = d;
+  }
+  return { decoded: url, depth: maxIter };
+}
+
+function isIpLiteral(host: string): { isIp: boolean; normalized: string } {
+  const h = host.replace(/^\[|\]$/g, "");
+  // Standard IPv4
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) {
+    const parts = h.split(".").map(Number);
+    if (parts.every((p) => p >= 0 && p <= 255)) return { isIp: true, normalized: h };
+  }
+  // DWORD integer
+  if (/^\d+$/.test(h)) {
+    const val = parseInt(h, 10);
+    if (val >= 0 && val <= 0xffffffff) {
+      const ip = `${(val >>> 24) & 0xff}.${(val >>> 16) & 0xff}.${(val >>> 8) & 0xff}.${val & 0xff}`;
+      return { isIp: true, normalized: ip };
+    }
+  }
+  // Hex
+  if (/^0x[0-9a-f]+$/i.test(h)) {
+    const val = parseInt(h, 16);
+    if (val >= 0 && val <= 0xffffffff) {
+      const ip = `${(val >>> 24) & 0xff}.${(val >>> 16) & 0xff}.${(val >>> 8) & 0xff}.${val & 0xff}`;
+      return { isIp: true, normalized: ip };
+    }
+  }
+  // Octal per-octet
+  if (/^0\d/.test(h) && h.includes(".")) {
+    const parts = h.split(".");
+    if (parts.length === 4) {
+      try {
+        const octets = parts.map((p) => parseInt(p, 8));
+        if (octets.every((o) => o >= 0 && o <= 255)) {
+          return { isIp: true, normalized: octets.join(".") };
+        }
+      } catch { /* not octal */ }
+    }
+  }
+  return { isIp: false, normalized: h };
+}
+
+// ─── Multi-Phase scanUrl ──────────────────────────────────────────────────────
+
 export function scanUrl(rawUrl: string): UrlScan {
+  const signals: UrlScan["signals"] = [];
+  let score = 0;
+  let critical = false;
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PHASE 1: Canonicalization & Lexical Normalization
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // Step 1: Recursive percent-decoding
+  let urlStr = rawUrl;
+  try {
+    const { decoded, depth } = recursiveDecode(rawUrl);
+    if (depth > 0) {
+      signals.push({ label: `URL was percent-encoded ${depth}x deep (obfuscation attempt)`, bad: true, phase: 1 });
+      score += 15 * depth;
+    }
+    urlStr = decoded;
+  } catch {
+    urlStr = rawUrl;
+  }
+
+  // Step 2: Parse
   let url: URL;
   try {
-    url = new URL(rawUrl.includes("://") ? rawUrl : `https://${rawUrl}`);
+    url = new URL(urlStr.includes("://") ? urlStr : `https://${urlStr}`);
   } catch {
     return {
-      risk: "High",
-      score: 96,
-      signals: [{ label: "Invalid URL format", bad: true }],
+      risk: "High", score: 96,
+      signals: [{ label: "Completely malformed URL — cannot parse", bad: true, phase: 1 }],
       domain: rawUrl,
     };
   }
 
-  const host = url.hostname.toLowerCase();
-  const signals: { label: string; bad: boolean }[] = [];
-  let score = 0;
-  let critical = false;
+  let host = url.hostname.toLowerCase();
 
-  if (url.protocol !== "https:") {
-    signals.push({ label: "Not using HTTPS", bad: true });
-    score += 25;
-  } else signals.push({ label: "Uses HTTPS encryption", bad: false });
-
-  // Critical scam-token in host or path
-  const fullUrl = (host + url.pathname).toLowerCase();
-  for (const tok of CRITICAL_URL_TOKENS) {
-    if (fullUrl.includes(tok)) {
-      signals.push({ label: `Critical scam keyword "${tok}" in URL`, bad: true });
-      score += 60;
+  // Step 3: Authority spoofing detection
+  if (url.username || rawUrl.includes("@")) {
+    const netloc = urlStr.split("://")[1]?.split("/")[0] || "";
+    if (netloc.includes("@")) {
+      const spoofed = netloc.split("@")[0];
+      const realHost = netloc.split("@").pop()?.split(":")[0] || host;
+      signals.push({ label: `Authority spoofing: '${spoofed}@' hides real host '${realHost}'`, bad: true, phase: 1 });
+      score += 55;
       critical = true;
+      try { host = new URL(`https://${realHost}`).hostname.toLowerCase(); } catch { /* keep original */ }
     }
   }
 
-  const tld = "." + host.split(".").pop();
+  // Step 4: Punycode / IDN homograph detection
+  if (host.startsWith("xn--") || host.includes(".xn--")) {
+    signals.push({ label: `Punycode homograph attack: '${host}' uses foreign characters to mimic a trusted domain`, bad: true, phase: 1 });
+    score += 65;
+    critical = true;
+  }
+
+  // Step 5: IP literal normalization
+  const ipCheck = isIpLiteral(host);
+  if (ipCheck.isIp) {
+    if (host !== ipCheck.normalized) {
+      signals.push({ label: `Obfuscated IP: '${host}' resolves to ${ipCheck.normalized}`, bad: true, phase: 1 });
+      score += 45;
+    } else {
+      signals.push({ label: `Direct IP address: ${ipCheck.normalized} (no domain name)`, bad: true, phase: 1 });
+      score += 20;
+    }
+    host = ipCheck.normalized;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PHASE 2: Reputation & Metadata Scoring
+  // ════════════════════════════════════════════════════════════════════════════
+
+  const parts = host.split(".");
+  const domain = parts.length >= 2 ? parts.slice(-2).join(".") : host;
+
+  // Trusted domain short-circuit
+  if (TRUSTED_DOMAINS.has(domain) && score < 20) {
+    signals.push({ label: `Domain '${domain}' is on the verified trusted allowlist`, bad: false, phase: 2 });
+    return { risk: "Low", score: Math.min(score, 5), signals, domain: host };
+  }
+
+  // HTTPS check
+  if (url.protocol !== "https:") {
+    signals.push({ label: "Not using HTTPS encryption", bad: true, phase: 2 });
+    score += 25;
+  } else {
+    signals.push({ label: "Uses HTTPS encryption", bad: false, phase: 2 });
+  }
+
+  // Shannon Entropy
+  const entropy = shannonEntropy(host);
+  if (entropy > 4.5) {
+    signals.push({ label: `Hostname entropy very high (${entropy.toFixed(2)} bits) — DGA suspect`, bad: true, phase: 2 });
+    score += 30;
+  } else if (entropy > 3.8) {
+    signals.push({ label: `Hostname entropy elevated (${entropy.toFixed(2)} bits)`, bad: true, phase: 2 });
+    score += 10;
+  }
+
+  // Suspicious TLD
+  const tld = "." + parts[parts.length - 1];
   if (SUSPICIOUS_TLDS.includes(tld)) {
-    signals.push({ label: `Suspicious TLD (${tld})`, bad: true });
+    signals.push({ label: `High-risk Top-Level Domain: '${tld}'`, bad: true, phase: 2 });
     score += 30;
   }
 
-  // ".co" mimic of ".com" with a known brand
+  // ".co" mimic of ".com"
   if (tld === ".co") {
     for (const brand of TRUSTED_BRANDS) {
       if (host.includes(brand)) {
-        signals.push({ label: `".co" mimicking "${brand}.com"`, bad: true });
+        signals.push({ label: `".co" mimicking "${brand}.com"`, bad: true, phase: 2 });
         score += 55;
         critical = true;
         break;
@@ -327,7 +423,18 @@ export function scanUrl(rawUrl: string): UrlScan {
     }
   }
 
-  // Brand impersonation via dash-style hostnames (e.g. "tcs-internships-portal.com", "google-careers-hub.xyz")
+  // Critical scam-token
+  const fullUrl = (host + url.pathname).toLowerCase();
+  for (const tok of CRITICAL_URL_TOKENS) {
+    if (fullUrl.includes(tok)) {
+      signals.push({ label: `Critical scam keyword: "${tok}"`, bad: true, phase: 2 });
+      score += 60;
+      critical = true;
+      break;
+    }
+  }
+
+  // Brand impersonation via dash-style hostnames
   const hostNoTld = host.replace(/\.[^.]+$/, "");
   if (hostNoTld.includes("-")) {
     for (const brand of IMPERSONATED_BRANDS) {
@@ -339,10 +446,7 @@ export function scanUrl(rawUrl: string): UrlScan {
         !host.endsWith(`${brand}.org`) &&
         !host.endsWith(`${brand}.in`)
       ) {
-        signals.push({
-          label: `Brand impersonation: "${brand}" used in a dash-style domain`,
-          bad: true,
-        });
+        signals.push({ label: `Brand impersonation: "${brand}" used in dash-style domain`, bad: true, phase: 2 });
         score += 70;
         critical = true;
         break;
@@ -358,47 +462,77 @@ export function scanUrl(rawUrl: string): UrlScan {
       !host.endsWith(`${brand}.co.in`) &&
       !host.endsWith(`${brand}.org`)
     ) {
-      signals.push({ label: `Possible typosquatting of "${brand}"`, bad: true });
+      signals.push({ label: `Possible typosquatting of "${brand}"`, bad: true, phase: 2 });
       score += 45;
       critical = true;
       break;
     }
   }
 
+  // URL Shortener
+  if (URL_SHORTENERS.includes(hostNoTld + tld) || URL_SHORTENERS.includes(host)) {
+    signals.push({ label: `URL shortener detected: '${host}' hides the real destination`, bad: true, phase: 2 });
+    score += 55;
+    critical = true;
+  }
+
+  // DGA — longest consonant sequence
+  let maxConsonants = 0;
+  let currentConsonants = 0;
+  for (const char of hostNoTld) {
+    if (/[bcdfghjklmnpqrstvwxyz]/.test(char)) {
+      currentConsonants++;
+      if (currentConsonants > maxConsonants) maxConsonants = currentConsonants;
+    } else {
+      currentConsonants = 0;
+    }
+  }
+  if (maxConsonants > 6) {
+    signals.push({ label: `Domain appears randomly generated: ${maxConsonants} consecutive consonants (DGA)`, bad: true, phase: 2 });
+    score += 40;
+    critical = true;
+  }
+
+  // Excessive hyphens
   const hyphens = (host.match(/-/g) || []).length;
-  if (hyphens >= 2) {
-    signals.push({
-      label: `Domain contains ${hyphens} hyphens (uncommon for legitimate brands)`,
-      bad: true,
-    });
+  if (hyphens >= 3) {
+    signals.push({ label: `Domain has ${hyphens} hyphens — unusual for legitimate sites`, bad: true, phase: 2 });
     score += 25;
-    critical = critical || hyphens >= 3;
+    critical = critical || hyphens >= 4;
   }
+
+  // Long domain
   if (host.length > 30) {
-    signals.push({ label: "Unusually long domain", bad: true });
-    score += 12;
-  }
-  const parts = host.split(".");
-  if (parts.length >= 4) {
-    signals.push({ label: "Excessive subdomains", bad: true });
+    signals.push({ label: `Unusually long domain: ${host.length} characters`, bad: true, phase: 2 });
     score += 12;
   }
 
+  // Excessive subdomains
+  if (parts.length >= 4) {
+    signals.push({ label: `Excessive subdomain depth: ${parts.length} levels`, bad: true, phase: 2 });
+    score += 12;
+  }
+
+  // Keyword stuffing
   const keywordHits = SUSPICIOUS_WORDS.filter((w) => host.includes(w));
   if (keywordHits.length >= 2) {
-    signals.push({ label: `Keyword stuffing: ${keywordHits.join(", ")}`, bad: true });
+    signals.push({ label: `Keyword stuffing: ${keywordHits.join(", ")}`, bad: true, phase: 2 });
     score += 20;
   }
 
-  // Mocked domain age — derived deterministically
-  const mockAgeDays = (host.length * 73) % 4000;
-  if (mockAgeDays < 90) {
-    signals.push({ label: `Domain age: ~${mockAgeDays} days (very new)`, bad: true });
-    score += 25;
-  } else signals.push({ label: `Domain age: ~${Math.round(mockAgeDays / 365)} years`, bad: false });
+  // Digit ratio
+  const digits = Array.from(host).filter((c) => /\d/.test(c)).length;
+  const letters = Array.from(host).filter((c) => /[a-z]/i.test(c)).length;
+  if (letters > 0 && digits / (digits + letters) > 0.4) {
+    signals.push({ label: `High digit ratio: ${digits} digits vs ${letters} letters`, bad: true, phase: 2 });
+    score += 15;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // FINAL SCORE
+  // ════════════════════════════════════════════════════════════════════════════
 
   if (critical) {
-    // Deterministic bump: hash the hostname to a stable value in [0, 13]
     let h = 0;
     for (let i = 0; i < host.length; i++) h = ((h << 5) - h + host.charCodeAt(i)) | 0;
     score = Math.max(score, 85 + (((h % 14) + 14) % 14));

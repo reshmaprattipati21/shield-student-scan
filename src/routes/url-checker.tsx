@@ -32,15 +32,50 @@ function UrlChecker() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-  const onCheck = (e: React.FormEvent) => {
+  const onCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
     setLoading(true);
     setResult(null);
-    setTimeout(() => {
+    try {
+      const targetUrl = url.trim();
+      const res = await fetch("/api/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: targetUrl }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to scan URL via ML model");
+      }
+      const data = await res.json();
+      
+      // Convert ML response to UI format
+      const score = Math.round(data.confidence * 100);
+      const risk = data.verdict === "phishing" || data.verdict === "blocked" ? "High" : score >= 30 ? "Medium" : "Low";
+      const domain = new URL(targetUrl.includes("://") ? targetUrl : `https://${targetUrl}`).hostname;
+      
+      // Backend now sends mixed good/bad signals — detect by checking for positive keywords
+      const goodKeywords = ["verified", "trusted", "safe", "established", "encryption", "successfully", "passed", "destination verified"];
+      const signals = data.signals.map((s: string) => ({
+        label: s,
+        bad: !goodKeywords.some(kw => s.toLowerCase().includes(kw)),
+      }));
+
+      const r = { score, risk: risk as "Low" | "Medium" | "High", domain, signals };
+      setResult(r);
+      
+      recordScan({
+        scan_type: "url",
+        target: r.domain || targetUrl,
+        score: r.score,
+        risk: r.risk,
+        userId: user?.id,
+      });
+    } catch (err) {
+      console.error(err);
+      // Fallback to local heuristic scan if API is down
       const r = scanUrl(url.trim());
       setResult(r);
-      setLoading(false);
       recordScan({
         scan_type: "url",
         target: r.domain || url.trim(),
@@ -48,7 +83,9 @@ function UrlChecker() {
         risk: r.risk,
         userId: user?.id,
       });
-    }, 800);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,7 +162,7 @@ function UrlChecker() {
                   </div>
                 )}
                 <div className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-3">
-                  Domain anomalies
+                  Threat Analysis Details
                 </div>
                 <ul className="space-y-2">
                   {result.signals.map((s, i) => (
