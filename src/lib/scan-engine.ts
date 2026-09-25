@@ -1,6 +1,19 @@
 // Shared strict scanning engine for ScamShield
 export type Risk = "Low" | "Medium" | "High";
 
+export const SCORING_THRESHOLDS = {
+  lowMax: 24,
+  mediumMin: 25,
+  highMin: 80,
+} as const;
+
+export function getRiskFromScore(score: number, critical = false): Risk {
+  const normalized = Math.min(100, Math.max(0, score));
+  if (critical || normalized >= SCORING_THRESHOLDS.highMin) return "High";
+  if (normalized >= SCORING_THRESHOLDS.mediumMin) return "Medium";
+  return "Low";
+}
+
 // Phrases that ALWAYS trigger High Risk regardless of total score
 export const CRITICAL_TEXT_PHRASES = [
   "security deposit",
@@ -164,9 +177,9 @@ export function scanText(text: string): TextScan {
 
   if (critical) score = Math.max(score, 88);
   score = Math.min(100, score);
-  // Tier mapping kept compatible with the 3-color gauge (Low/Medium/High).
-  // 65-79 surfaces as "Medium" + the impersonation badge above.
-  const risk: Risk = score >= 80 || critical ? "High" : score >= 25 ? "Medium" : "Low";
+  // Risk bands are normalized across all scanners:
+  // Low: 0-24, Medium: 25-79, High: 80+ or any critical signal.
+  const risk = getRiskFromScore(score, critical);
   return { risk, score, hits, flags };
 }
 
@@ -538,6 +551,6 @@ export function scanUrl(rawUrl: string): UrlScan {
     score = Math.max(score, 85 + (((h % 14) + 14) % 14));
   }
   score = Math.min(100, score);
-  const risk: Risk = score >= 60 || critical ? "High" : score >= 30 ? "Medium" : "Low";
+  const risk = getRiskFromScore(score, critical);
   return { risk, score, signals, domain: host };
 }

@@ -7,6 +7,7 @@ type AuthCtx = {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<Session | null>;
 };
 
 export function isAdminEmail(email: string) {
@@ -19,35 +20,64 @@ const Ctx = createContext<AuthCtx>({
   session: null,
   loading: true,
   signOut: async () => {},
+  refreshSession: async () => null,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshSession = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error("[Auth] Failed to refresh session:", error.message);
+      setSession(null);
+      return null;
+    }
+    setSession(data.session);
+    return data.session;
+  };
+
   useEffect(() => {
+    let ignore = false;
+
+    const syncSession = async () => {
+      const next = await refreshSession();
+      if (!ignore) {
+        setSession(next ?? null);
+        setLoading(false);
+      }
+    };
+
+    syncSession();
+
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (ignore) return;
+      setSession(nextSession);
       setLoading(false);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
+
     return () => {
+      ignore = true;
       subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut().catch(() => {});
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("[Auth] Sign-out failed:", error.message);
+      throw error;
+    }
+    setSession(null);
+    setLoading(false);
   };
 
   const user = session?.user ?? null;
 
-  return <Ctx.Provider value={{ user, session, loading, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, session, loading, signOut, refreshSession }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

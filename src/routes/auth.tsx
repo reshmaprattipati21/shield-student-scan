@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,21 @@ import { seedMockHistoryIfEmpty } from "@/lib/scan-history";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
+  beforeLoad: async ({ location }) => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("[Auth] Session check for auth page failed:", error.message);
+    }
+
+    if (session) {
+      const redirectTo = (location.search.redirect as string | undefined) || (isAdminEmail(session.user.email ?? "") ? "/reports" : "/");
+      throw redirect({ to: redirectTo });
+    }
+  },
   component: AuthPage,
   validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "" }),
   head: () => ({ meta: [{ title: "Sign in — ScamShield" }] }),

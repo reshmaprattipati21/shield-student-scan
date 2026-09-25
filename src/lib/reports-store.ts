@@ -14,7 +14,11 @@ const KEY = "scamshield:reports:v1";
 const EVENT = "scamshield:reports-change";
 const MAX = 200;
 
-// ─── localStorage helpers (fallback) ─────────────────────────────────────────
+function normalizeLocal(items: Report[]) {
+  return items.slice(0, MAX);
+}
+
+// ─── localStorage helpers (fallback for guest mode) ─────────────────────────
 
 function readLocal(): Report[] {
   if (typeof window === "undefined") return [];
@@ -29,19 +33,36 @@ function readLocal(): Report[] {
 
 function writeLocal(items: Report[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
-  window.dispatchEvent(new CustomEvent(EVENT));
+  try {
+    window.localStorage.setItem(KEY, JSON.stringify(normalizeLocal(items)));
+    window.dispatchEvent(new CustomEvent(EVENT));
+  } catch (error) {
+    console.error("[Reports] Failed to write local reports:", error);
+  }
 }
 
-// ─── addReport — writes to localStorage AND Supabase ─────────────────────────
+function mergeLocalWithRemote(remote: Report[], userId?: string): Report[] {
+  const local = readLocal().filter((item) => !userId || item.user_id === userId);
+  const byId = new Map<string, Report>();
 
-export function addReport(input: {
+  for (const item of [...remote, ...local]) {
+    byId.set(item.id, item);
+  }
+
+  return [...byId.values()].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
+// ─── addReport — writes to Supabase first when authenticated ────────────────
+
+export async function addReport(input: {
   user_id: string;
   company_name: string;
   platform: string;
   description: string;
-}): Report {
-  const item: Report = {
+}): Promise<Report> {
+  const localFallback: Report = {
     id:
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
@@ -50,57 +71,80 @@ export function addReport(input: {
     created_at: new Date().toISOString(),
   };
 
-  // Write to localStorage for instant UI reactivity
-  writeLocal([item, ...readLocal()]);
-
-  // Also persist to Supabase
   if (input.user_id) {
-    supabase
-      .from("scam_reports")
-      .insert({
-        user_id: input.user_id,
-        company_name: input.company_name,
-        platform: input.platform,
-        description: input.description,
-      })
-      .then(({ error }) => {
-        if (error) {
-          console.error("[Reports] Supabase insert failed:", error.message);
-        }
-      });
+    try {
+      const { data, error } = await supabase
+        .from("scam_reports")
+        .insert({
+          user_id: input.user_id,
+          company_name: input.company_name,
+          platform: input.platform,
+          description: input.description,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("No report data returned from Supabase insert");
+      }
+
+      const insertedReport: Report = {
+        id: data.id,
+        user_id: data.user_id,
+        company_name: data.company_name,
+        platform: data.platform,
+        description: data.description,
+        created_at: data.created_at,
+      };
+
+      const next = [insertedReport, ...readLocal().filter((item) => item.id !== insertedReport.id)];
+      writeLocal(next);
+      return insertedReport;
+    } catch (error) {
+      console.error("[Reports] Supabase insert failed:", error);
+      const next = [localFallback, ...readLocal().filter((item) => item.id !== localFallback.id)];
+      writeLocal(next);
+      return localFallback;
+    }
   }
 
-  return item;
+  // Fallback for unauthenticated users (localStorage)
+  const next = [localFallback, ...readLocal()];
+  writeLocal(next);
+  return localFallback;
 }
 
-// ─── deleteReport — deletes from localStorage AND Supabase ───────────────────
+// ─── deleteReport — deletes from Supabase AND updates local state ───────────
 
-export function deleteReport(id: string, userId?: string) {
-  writeLocal(readLocal().filter((r) => r.id !== id));
-
-  // Also delete from Supabase
+export async function deleteReport(id: string, userId?: string) {
   if (userId) {
-    supabase
+    const { error } = await supabase
       .from("scam_reports")
       .delete()
-      .eq("id", id)
-      .then(({ error }) => {
-        if (error) {
-          console.error("[Reports] Supabase delete failed:", error.message);
-        }
-      });
+      .eq("id", id);
+
+    if (error) {
+      console.error("[Reports] Supabase delete failed:", error.message);
+      throw error;
+    }
   }
+
+  const next = readLocal().filter((r) => r.id !== id);
+  writeLocal(next);
 }
 
-// ─── useReports — reads from Supabase when authenticated, else localStorage ──
+// ─── useReports — fetches global feed + subscribes to Supabase Realtime ─────
 
 export function useReports(userId?: string) {
   const [items, setItems] = useState<Report[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const load = useCallback(async () => {
     if (userId) {
-      // Authenticated — fetch from Supabase
       setLoading(true);
       const { data, error } = await supabase
         .from("scam_reports")
@@ -109,23 +153,22 @@ export function useReports(userId?: string) {
 
       if (error) {
         console.error("[Reports] Supabase fetch failed:", error.message);
-        // Fall back to localStorage
-        setItems(readLocal());
+        setItems(readLocal().filter((item) => item.user_id === userId));
       } else {
-        setItems(
-          (data ?? []).map((row) => ({
-            id: row.id,
-            user_id: row.user_id,
-            company_name: row.company_name,
-            platform: row.platform,
-            description: row.description,
-            created_at: row.created_at,
-          }))
-        );
+        const remote = (data ?? []).map((row) => ({
+          id: row.id,
+          user_id: row.user_id,
+          company_name: row.company_name,
+          platform: row.platform,
+          description: row.description,
+          created_at: row.created_at,
+        }));
+
+        const merged = mergeLocalWithRemote(remote, userId);
+        setItems(merged);
       }
       setLoading(false);
     } else {
-      // Unauthenticated — use localStorage
       setItems(readLocal());
       setLoading(false);
     }
@@ -134,16 +177,36 @@ export function useReports(userId?: string) {
   useEffect(() => {
     load();
 
+    // Listen for local tab/custom event triggers
     const onChange = () => {
       load();
     };
     window.addEventListener(EVENT, onChange);
     window.addEventListener("storage", onChange);
+
+    // Subscribe to Supabase Realtime for instant multi-account synchronization
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    if (userId) {
+      channel = supabase
+        .channel("public:scam_reports")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "scam_reports" },
+          () => {
+            load();
+          }
+        )
+        .subscribe();
+    }
+
     return () => {
       window.removeEventListener(EVENT, onChange);
       window.removeEventListener("storage", onChange);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
-  }, [load]);
+  }, [load, userId]);
 
   return { items, loading, reload: load };
 }

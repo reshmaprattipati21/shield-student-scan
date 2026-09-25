@@ -16,6 +16,20 @@ const KEY = "scamshield:scan-history:v1";
 const EVENT = "scamshield:scan-history-change";
 const MAX = 50;
 
+function normalizeLocal(items: ScanHistoryEntry[]) {
+  return items.slice(0, MAX);
+}
+
+function mergeHistory(remote: ScanHistoryEntry[], local: ScanHistoryEntry[]) {
+  const byId = new Map<string, ScanHistoryEntry>();
+  for (const item of [...remote, ...local]) {
+    byId.set(item.id, item);
+  }
+  return [...byId.values()].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
 // ─── localStorage helpers (fallback for unauthenticated users) ───────────────
 
 export function seedMockHistoryIfEmpty() {
@@ -60,7 +74,8 @@ function readLocal(): ScanHistoryEntry[] {
 function writeLocal(items: ScanHistoryEntry[]) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
+    const next = normalizeLocal(items);
+    window.localStorage.setItem(KEY, JSON.stringify(next));
     window.dispatchEvent(new CustomEvent(EVENT));
   } catch (err) {
     console.error("Failed to write to scan history:", err);
@@ -92,11 +107,6 @@ export function recordScan(entry: {
     created_at: new Date().toISOString(),
   };
 
-  // Always write to localStorage for instant UI reactivity
-  const next = [item, ...readLocal()].slice(0, MAX);
-  writeLocal(next);
-
-  // If the user is authenticated, also persist to Supabase
   if (entry.userId) {
     supabase
       .from("scan_history")
@@ -108,30 +118,50 @@ export function recordScan(entry: {
         risk: item.risk,
         flags: (entry.flags ?? []) as unknown as import("@/integrations/supabase/types").Json,
       })
-      .then(({ error }) => {
+      .then(({ data, error }) => {
         if (error) {
           console.error("[ScanHistory] Supabase insert failed:", error.message);
+          writeLocal([item, ...readLocal()]);
+          return;
+        }
+
+        if (data?.[0]) {
+          const remoteItem: ScanHistoryEntry = {
+            id: data[0].id,
+            scan_type: data[0].scan_type as ScanType,
+            target: data[0].target,
+            score: data[0].score,
+            risk: data[0].risk,
+            flags: Array.isArray(data[0].flags) ? (data[0].flags as string[]) : undefined,
+            created_at: data[0].created_at,
+          };
+          const merged = mergeHistory([remoteItem], readLocal()).slice(0, MAX);
+          writeLocal(merged);
         }
       });
+    return;
   }
+
+  const next = [item, ...readLocal()].slice(0, MAX);
+  writeLocal(next);
 }
 
 // ─── clearScanHistory — clears localStorage AND Supabase (if authenticated) ──
 
-export function clearScanHistory(userId?: string) {
-  writeLocal([]);
-
+export async function clearScanHistory(userId?: string) {
   if (userId) {
-    supabase
+    const { error } = await supabase
       .from("scan_history")
       .delete()
-      .eq("user_id", userId)
-      .then(({ error }) => {
-        if (error) {
-          console.error("[ScanHistory] Supabase delete failed:", error.message);
-        }
-      });
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("[ScanHistory] Supabase delete failed:", error.message);
+      throw error;
+    }
   }
+
+  writeLocal([]);
 }
 
 // ─── useScanHistory — reads from Supabase when authenticated, else localStorage
@@ -141,7 +171,6 @@ export function useScanHistory(limit = 12, userId?: string) {
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    // If authenticated, fetch from Supabase
     if (userId) {
       setLoading(true);
       const { data, error } = await supabase
@@ -153,10 +182,9 @@ export function useScanHistory(limit = 12, userId?: string) {
 
       if (error) {
         console.error("[ScanHistory] Supabase fetch failed:", error.message);
-        // Fall back to localStorage on error
         setItems(readLocal().slice(0, limit));
       } else {
-        const mapped: ScanHistoryEntry[] = (data ?? []).map((row) => ({
+        const remote: ScanHistoryEntry[] = (data ?? []).map((row) => ({
           id: row.id,
           scan_type: row.scan_type as ScanType,
           target: row.target,
@@ -165,11 +193,12 @@ export function useScanHistory(limit = 12, userId?: string) {
           flags: Array.isArray(row.flags) ? (row.flags as string[]) : undefined,
           created_at: row.created_at,
         }));
-        setItems(mapped);
+
+        const merged = mergeHistory(remote, readLocal().filter((item) => item.id.startsWith("local-"))).slice(0, limit);
+        setItems(merged);
       }
       setLoading(false);
     } else {
-      // Unauthenticated — use localStorage
       setItems(readLocal().slice(0, limit));
     }
   }, [limit, userId]);

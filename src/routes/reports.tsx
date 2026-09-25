@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Users, Building2, Plus, Trash2, Flag } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -9,10 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth-context";
 import { addReport, deleteReport, useReports } from "@/lib/reports-store";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/reports")({
+  beforeLoad: async ({ location }) => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("[Auth] Protected route session check failed:", error.message);
+    }
+
+    if (!session) {
+      throw redirect({
+        to: "/auth",
+        search: { redirect: location.href },
+      });
+    }
+  },
   component: Reports,
   head: () => ({ meta: [{ title: "Community Reports — ScamShield" }, { name: "description", content: "Browse and submit student-reported internship and job scams." }] }),
 });
@@ -100,10 +118,15 @@ function Reports() {
 }
 
 function DeleteBtn({ id, userId, onDone }: { id: string; userId?: string; onDone: () => void }) {
-  const del = () => {
-    deleteReport(id, userId);
-    toast.success("Report deleted");
-    onDone();
+  const del = async () => {
+    try {
+      await deleteReport(id, userId);
+      toast.success("Report deleted");
+      onDone();
+    } catch (error) {
+      console.error("[Reports] Delete failed:", error);
+      toast.error("Could not delete the report. Please try again.");
+    }
   };
   return <Button size="sm" variant="ghost" onClick={del}><Trash2 className="h-4 w-4" /></Button>;
 }
@@ -124,20 +147,24 @@ function ReportForm({ onSubmitted }: { onSubmitted: () => void }) {
 
     setSubmitting(true);
     try {
-      addReport({
+      await addReport({
         user_id: user.id,
         company_name: company.trim(),
         platform: platform.trim(),
         description: description.trim(),
       });
+
+      toast.success("Report submitted");
+      setCompany("");
+      setPlatform("");
+      setDescription("");
+      onSubmitted();
     } catch (err) {
+      console.error("[Reports] Submit failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to submit report");
+    } finally {
       setSubmitting(false);
-      return toast.error(err instanceof Error ? err.message : "Failed to submit report");
     }
-    setSubmitting(false);
-    toast.success("Report submitted");
-    setCompany(""); setPlatform(""); setDescription("");
-    onSubmitted();
   };
 
   return (
